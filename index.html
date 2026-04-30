@@ -316,11 +316,11 @@
 
 ```
 <div class="tabs">
-  <div class="tab active" onclick="switchTab('list')">My List</div>
-  <div class="tab" onclick="switchTab('search')">Search</div>
-  <div class="tab" onclick="switchTab('seasonal')">This Season</div>
-  <div class="tab" onclick="switchTab('trending')">Trending</div>
-  <div class="tab" onclick="switchTab('foryou')">For You</div>
+  <div class="tab active" onclick="switchTab('list', this)">My List</div>
+  <div class="tab" onclick="switchTab('search', this)">Search</div>
+  <div class="tab" onclick="switchTab('seasonal', this)">This Season</div>
+  <div class="tab" onclick="switchTab('trending', this)">Trending</div>
+  <div class="tab" onclick="switchTab('foryou', this)">For You</div>
 </div>
 
 <!-- MY LIST TAB -->
@@ -522,11 +522,58 @@
   </div>
 
 <script>
+  // API HELPER WITH ERROR HANDLING
+  async function fetchWithRetry(url, retries = 2) {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const response = await fetch(url);
+        
+        // Handle rate limiting
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After') || 3;
+          if (i < retries) {
+            await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+            continue;
+          }
+          throw new Error('Rate limit exceeded. Please wait a moment.');
+        }
+        
+        // Handle other errors
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        // Network error or last retry
+        if (i === retries) {
+          if (!navigator.onLine) {
+            throw new Error('No internet connection. Please check your network.');
+          }
+          throw error;
+        }
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+  }
+
   const JIKAN = "https://api.jikan.moe/v4";
   let favorites = [], wantToWatch = [], loved = [];
-  let searchCache = {}, tagResultsPage = 1, searchResultsPage = 1;
+  let searchCache = {};
+  let searchCacheTimestamp = Date.now();
+  const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour
+  let tagResultsPage = 1, searchResultsPage = 1;
   let currentSearchQuery = "", currentSearchResults = [];
   let currentTagResults = [], tagParams = null;
+
+  // Clear cache if expired
+  function checkCacheExpiry() {
+    if (Date.now() - searchCacheTimestamp > CACHE_EXPIRY) {
+      searchCache = {};
+      searchCacheTimestamp = Date.now();
+    }
+  }
 
   function loadAll() {
     favorites = JSON.parse(localStorage.getItem("0xa7_favorites") || "[]");
@@ -534,18 +581,32 @@
     loved = JSON.parse(localStorage.getItem("0xa7_loved") || "[]");
   }
   function saveAll() {
-    localStorage.setItem("0xa7_favorites", JSON.stringify(favorites));
-    localStorage.setItem("0xa7_want_to_watch", JSON.stringify(wantToWatch));
-    localStorage.setItem("0xa7_loved", JSON.stringify(loved));
+    try {
+      localStorage.setItem("0xa7_favorites", JSON.stringify(favorites));
+      localStorage.setItem("0xa7_want_to_watch", JSON.stringify(wantToWatch));
+      localStorage.setItem("0xa7_loved", JSON.stringify(loved));
+    } catch (e) {
+      console.error("Failed to save to localStorage:", e);
+      if (e.name === 'QuotaExceededError') {
+        alert("Storage quota exceeded. Please clear some lists.");
+      }
+    }
   }
   loadAll();
 
   // TAB SWITCHING
-  function switchTab(name) {
+  function switchTab(name, clickedElement) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-    event.target.classList.add("active");
+    if (clickedElement) clickedElement.classList.add("active");
     document.getElementById(`panel-${name}`).classList.add("active");
+    
+    // Stop countdown when leaving trending tab
+    if (name !== "trending" && countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+    
     if (name === "seasonal") initSeasonal();
     if (name === "trending") initTrending();
     if (name === "search") initStudios();
@@ -574,29 +635,31 @@
   });
 
   async function searchAnime(q, container, context) {
+    checkCacheExpiry();
     if (searchCache[q]) {
       renderSearchDropdown(searchCache[q], container, context);
       return;
     }
     try {
-      const r = await fetch(`${JIKAN}/anime?q=${encodeURIComponent(q)}&sfw=true&limit=8`);
-      const d = await r.json();
-      searchCache[q] = d.data || [];
+      const data = await fetchWithRetry(`${JIKAN}/anime?q=${encodeURIComponent(q)}&sfw=true&limit=8`);
+      searchCache[q] = data.data || [];
       renderSearchDropdown(searchCache[q], container, context);
     } catch (e) {
-      container.innerHTML = `<div class="search-item" style="color:var(--red);justify-content:center">Search failed</div>`;
+      console.error("Search error:", e);
+      container.innerHTML = `<div class="search-item" style="color:var(--red);justify-content:center">${e.message || 'Search failed'}</div>`;
       container.style.display = "block";
     }
   }
 
   function renderSearchDropdown(results, container, context) {
-    if (!results.length) {
+    if (!results || !Array.isArray(results) || !results.length) {
       container.innerHTML = `<div class="search-item" style="justify-content:center;color:var(--dimmer)">No results</div>`;
       container.style.display = "block";
       return;
     }
     container.innerHTML = results.map(a => {
-      const id = a.mal_id, title = esc(a.title);
+      if (!a || !a.mal_id) return '';
+      const id = a.mal_id, title = esc(a.title || 'Unknown');
       const img = a.images?.jpg?.image_url || "";
       const year = a.aired?.prop?.from?.year || "N/A";
       const score = a.score ? parseFloat(a.score).toFixed(1) : "N/A";
@@ -605,7 +668,7 @@
         <div class="search-item" onclick="openModal(${id})">
           <img src="${img}" alt="${title}" loading="lazy">
           <div style="flex:1;min-width:0">
-            <div class="si-title">${a.title}</div>
+            <div class="si-title">${a.title || 'Unknown'}</div>
             <div class="si-meta">${a.type || "?"} · ${year}</div>
           </div>
           <div class="si-score">${score}</div>
@@ -618,7 +681,7 @@
             `}
           </div>
         </div>`;
-    }).join("");
+    }).filter(Boolean).join("");
     container.style.display = "block";
   }
 
@@ -631,12 +694,26 @@
     else if (list === "want_to_watch") renderWantToWatch();
     else renderLoved();
     
-    // Update button in For You results if present
-    const btn = document.getElementById(`fywant-${id}`);
-    if (btn && list === "want_to_watch") {
-      btn.classList.add("added");
-      btn.textContent = "✓ In Want to Watch";
-    }
+    // Update all possible button instances across the app
+    const buttonSelectors = [
+      `#fywant-${id}`,
+      `#seasonwant-${id}`,
+      `#newwant-${id}`,
+      `#postwant-${id}`,
+      `#modal-want-${id}`
+    ];
+    
+    buttonSelectors.forEach(selector => {
+      const btn = document.querySelector(selector);
+      if (btn && list === "want_to_watch") {
+        btn.classList.add("added");
+        if (btn.classList.contains('overlay-btn')) {
+          btn.textContent = '✓ In Want to Watch';
+        } else if (btn.classList.contains('modal-btn')) {
+          btn.textContent = '✓ In Want to Watch';
+        }
+      }
+    });
   }
 
   function inList(arr, id) { return arr.some(x => x.id === id); }
@@ -717,9 +794,6 @@
   renderFavorites();
   renderWantToWatch();
   renderLoved();
-  
-  // Initialize studio chips on load
-  initStudios();
 
   // RANDOM PICKER - Smart recommendation based on favorites
   async function pickRandom() {
@@ -1913,7 +1987,30 @@
   }
 
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closeModal();
+    const modal = document.getElementById("modal");
+    const isModalOpen = modal.classList.contains("show");
+    
+    // Close modal on Escape
+    if (e.key === "Escape" && isModalOpen) {
+      closeModal();
+    }
+    
+    // Tab navigation - trap focus in modal
+    if (e.key === "Tab" && isModalOpen) {
+      const focusableElements = modal.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
+    }
   });
 </script>
 
