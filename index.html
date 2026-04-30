@@ -2219,16 +2219,32 @@
       }
       
       // Fetch full details for chronological ordering
-      if (watchOrderItems.length > 0 && watchOrderItems.length <= 15) {
+      if (watchOrderItems.length > 0) {
         try {
-          const detailPromises = watchOrderItems.map(item => 
+          // Limit to 25 items max to avoid too many API calls
+          const itemsToFetch = watchOrderItems.slice(0, 25);
+          
+          const detailPromises = itemsToFetch.map(item => 
             fetchWithRetry(`${JIKAN}/anime/${item.id}`)
               .then(data => {
                 const anime = data.data;
-                if (!anime) return item;
+                if (!anime) {
+                  console.warn(`No data for ${item.title} (${item.id})`);
+                  return item;
+                }
                 
-                // Update image to high quality version
-                item.img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || item.img;
+                // Update image to high quality version - try multiple sources
+                const imgUrl = anime.images?.jpg?.large_image_url || 
+                               anime.images?.jpg?.image_url || 
+                               anime.images?.webp?.large_image_url ||
+                               anime.images?.webp?.image_url ||
+                               item.img;
+                
+                if (!imgUrl) {
+                  console.error(`No image found for ${item.title}`);
+                }
+                
+                item.img = imgUrl;
                 
                 // Get the actual start date
                 const airedFrom = anime.aired?.from;
@@ -2241,12 +2257,16 @@
                 return item;
               })
               .catch(err => {
-                console.error(`Failed to fetch details for ${item.title}:`, err);
+                console.error(`Failed to fetch details for ${item.title} (ID: ${item.id}):`, err);
                 item.year = 9999;
                 return item;
               })
           );
+          
           await Promise.all(detailPromises);
+          
+          // Only keep items that were fetched
+          watchOrderItems.splice(0, watchOrderItems.length, ...itemsToFetch);
           
           // Sort by actual date (year, month, day)
           watchOrderItems.sort((a, b) => {
@@ -2261,7 +2281,7 @@
             return a.day - b.day;
           });
           
-          console.log("Watch order sorted:", watchOrderItems.map(i => `${i.title} (${i.year}) - ${i.img ? 'has image' : 'NO IMAGE'}`));
+          console.log("Watch order sorted:", watchOrderItems.map(i => `${i.title} (${i.year}) - ${i.img ? '✓' : '✗ NO IMAGE'}`));
         } catch (e) {
           console.error("Failed to fetch watch order details:", e);
         }
@@ -2321,11 +2341,16 @@
         <div class="modal-body">
           ${watchOrderItems.length ? `
             <div class="modal-section">
-              <div class="modal-label">📺 Watch Order (Chronological)</div>
+              <div class="modal-label">📺 Watch Order (Chronological) • ${watchOrderItems.length} items</div>
               <div class="watch-order-scroll" id="watch-order-scroll">
                 ${watchOrderItems.map(item => `
                   <div class="watch-order-card" onclick="openModal(${item.id})">
-                    <img src="${item.img}" alt="${esc(item.title)}" loading="lazy">
+                    ${item.img ? 
+                      `<img src="${item.img}" alt="${esc(item.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                       <div style="display:none;width:100%;aspect-ratio:2/3;background:var(--surface2);align-items:center;justify-content:center;color:var(--dimmer);font-size:.7rem;text-align:center;padding:.5rem">No Image</div>` 
+                      : 
+                      `<div style="width:100%;aspect-ratio:2/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--dimmer);font-size:.7rem;text-align:center;padding:.5rem">No Image</div>`
+                    }
                     <div class="watch-order-info">
                       <div class="watch-order-relation">${item.relation}</div>
                       <div class="watch-order-title">${item.title}</div>
