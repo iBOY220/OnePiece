@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -23,287 +22,284 @@
     @keyframes shimmer { to { background-position: 200%; } }
     .container { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
 
-```
-/* HEADER */
-.header { text-align: center; margin-bottom: 2.5rem; }
-.logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.8rem,7vw,4.5rem); letter-spacing:.1em; color:#fff; line-height:1; text-shadow:0 0 60px rgba(142,68,173,.4); }
-.logo .x { text-transform: lowercase; font-family: 'Bebas Neue', sans-serif; }
-.logo span { color: var(--red); }
-.tagline { font-size:.75rem; color:var(--dim); letter-spacing:.18em; text-transform:uppercase; margin-top:.4rem; }
+    /* HEADER */
+    .header { text-align: center; margin-bottom: 2.5rem; }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.8rem,7vw,4.5rem); letter-spacing:.1em; line-height:1; text-shadow:0 0 60px rgba(142,68,173,.4); }
+    .logo .x { color: #fff; }
+    .logo span { color: var(--red); }
+    .tagline { font-size:.75rem; color:var(--dim); letter-spacing:.18em; text-transform:uppercase; margin-top:.4rem; }
 
-/* TABS */
-.tabs { 
-  display:flex; 
-  background:var(--surface); 
-  border-radius:12px; 
-  padding:6px; 
-  margin-bottom:1.5rem; 
-  border:.5px solid var(--border); 
-  overflow-x: auto;
-  gap:4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,.3);
-}
-.tab { 
-  flex:1; 
-  padding:.7rem 1rem; 
-  text-align:center; 
-  cursor:pointer; 
-  border-radius:9px; 
-  font-size:.88rem; 
-  font-weight:500; 
-  color:var(--dim); 
-  transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); 
-  user-select:none; 
-  white-space: nowrap; 
-  min-width: 90px;
-  position: relative;
-  overflow: hidden;
-}
-.tab::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(142,68,173,.1), transparent);
-  transition: left .5s;
-}
-.tab:hover:not(.active)::before {
-  left: 100%;
-}
-.tab:hover:not(.active) {
-  color: var(--muted);
-  background: rgba(255,255,255,.02);
-}
-.tab.active { 
-  background: linear-gradient(135deg, var(--surface2) 0%, #1e1a28 100%);
-  color: var(--text);
-  box-shadow: 0 2px 12px rgba(142,68,173,.15), inset 0 1px 0 rgba(255,255,255,.05);
-  font-weight: 600;
-}
-.tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--purple), transparent);
-  border-radius: 2px;
-}
-.panel { display:none; }
-.panel.active { display:block; animation: fadeUp .3s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    /* TABS */
+    .tabs { 
+      display:flex; 
+      background:var(--surface); 
+      border-radius:12px; 
+      padding:6px; 
+      margin-bottom:1.5rem; 
+      border:.5px solid var(--border); 
+      overflow-x: auto;
+      gap:4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+    .tab { 
+      flex:1; 
+      padding:.7rem 1rem; 
+      text-align:center; 
+      cursor:pointer; 
+      border-radius:9px; 
+      font-size:.88rem; 
+      font-weight:500; 
+      color:var(--dim); 
+      transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); 
+      user-select:none; 
+      white-space: nowrap; 
+      min-width: 90px;
+      position: relative;
+      overflow: hidden;
+    }
+    .tab::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(142,68,173,.1), transparent);
+      transition: left .5s;
+    }
+    .tab:hover:not(.active)::before {
+      left: 100%;
+    }
+    .tab:hover:not(.active) {
+      color: var(--muted);
+      background: rgba(255,255,255,.02);
+    }
+    .tab.active { 
+      background: linear-gradient(135deg, var(--surface2) 0%, #1e1a28 100%);
+      color: var(--text);
+      box-shadow: 0 2px 12px rgba(142,68,173,.15), inset 0 1px 0 rgba(255,255,255,.05);
+      font-weight: 600;
+    }
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+      border-radius: 2px;
+    }
+    .panel { display:none; }
+    .panel.active { display:block; animation: fadeUp .3s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-/* SEARCH */
-.search-wrap { position:relative; margin-bottom:.75rem; }
-.search-icon { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:var(--dim); pointer-events:none; }
-.search-input { width:100%; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem .75rem 2.5rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
-.search-input:focus { border-color:var(--purple); }
-.search-input::placeholder { color:var(--dimmer); }
+    /* SEARCH */
+    .search-wrap { position:relative; margin-bottom:.75rem; }
+    .search-icon { position:absolute; left:.85rem; top:50%; transform:translateY(-50%); color:var(--dim); pointer-events:none; }
+    .search-input { width:100%; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem .75rem 2.5rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+    .search-input:focus { border-color:var(--purple); }
+    .search-input::placeholder { color:var(--dimmer); }
 
-/* SEARCH DROPDOWN */
-.search-results { background:var(--surface); border:.5px solid var(--border); border-radius:9px; overflow:hidden; margin-bottom:1rem; display:none; max-height:400px; overflow-y:auto; }
-.search-item { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; cursor:pointer; border-bottom:.5px solid var(--border2); transition:background .15s; }
-.search-item:last-child { border-bottom:none; }
-.search-item:hover { background:var(--surface2); }
-.search-item img { width:36px; height:52px; object-fit:cover; border-radius:4px; background:var(--surface2); flex-shrink:0; }
-.si-title { font-size:.88rem; font-weight:500; color:var(--text); }
-.si-meta { font-size:.73rem; color:var(--dim); margin-top:2px; }
-.si-score { margin-left:auto; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--red); flex-shrink:0; }
-.si-actions { display:flex; gap:.3rem; margin-left:.5rem; flex-shrink:0; }
-.si-btn { width:28px; height:28px; border-radius:6px; border:.5px solid var(--border); background:var(--surface2); cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; transition:background .15s; }
-.si-btn:hover { background:var(--border); }
-.si-btn-fav:hover  { background:#2a1a0a; border-color:var(--gold); }
-.si-btn-want:hover { background:#0a1a0e; border-color:#27ae60; }
-.search-more { padding:.6rem 1rem; text-align:center; font-size:.78rem; color:var(--purple); cursor:pointer; border-top:.5px solid var(--border2); transition:background .15s; }
-.search-more:hover { background:var(--surface2); }
+    /* SEARCH DROPDOWN */
+    .search-results { background:var(--surface); border:.5px solid var(--border); border-radius:9px; overflow:hidden; margin-bottom:1rem; display:none; max-height:400px; overflow-y:auto; }
+    .search-item { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; cursor:pointer; border-bottom:.5px solid var(--border2); transition:background .15s; }
+    .search-item:last-child { border-bottom:none; }
+    .search-item:hover { background:var(--surface2); }
+    .search-item img { width:36px; height:52px; object-fit:cover; border-radius:4px; background:var(--surface2); flex-shrink:0; }
+    .si-title { font-size:.88rem; font-weight:500; color:var(--text); }
+    .si-meta { font-size:.73rem; color:var(--dim); margin-top:2px; }
+    .si-score { margin-left:auto; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--red); flex-shrink:0; }
+    .si-actions { display:flex; gap:.3rem; margin-left:.5rem; flex-shrink:0; }
+    .si-btn { width:28px; height:28px; border-radius:6px; border:.5px solid var(--border); background:var(--surface2); cursor:pointer; font-size:.8rem; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+    .si-btn:hover { background:var(--border); }
+    .si-btn-fav:hover  { background:#2a1a0a; border-color:var(--gold); }
+    .si-btn-want:hover { background:#0a1a0e; border-color:#27ae60; }
+    .search-more { padding:.6rem 1rem; text-align:center; font-size:.78rem; color:var(--purple); cursor:pointer; border-top:.5px solid var(--border2); transition:background .15s; }
+    .search-more:hover { background:var(--surface2); }
 
-/* LIST SECTIONS */
-.list-section { margin-bottom:1.75rem; }
-.section-divider { font-family:'Bebas Neue',sans-serif; font-size:.82rem; letter-spacing:.18em; color:var(--dim); margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:.5px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
-.section-count { font-family:'Inter',sans-serif; font-size:.7rem; color:var(--dimmer); letter-spacing:0; font-weight:400; }
-.clear-btn { font-family:'Inter',sans-serif; font-size:.7rem; color:var(--dimmer); cursor:pointer; background:none; border:none; transition:color .2s; }
-.clear-btn:hover { color:var(--red); }
+    /* LIST SECTIONS */
+    .list-section { margin-bottom:1.75rem; }
+    .section-divider { font-family:'Bebas Neue',sans-serif; font-size:.82rem; letter-spacing:.18em; color:var(--dim); margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:.5px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
+    .section-count { font-family:'Inter',sans-serif; font-size:.7rem; color:var(--dimmer); letter-spacing:0; font-weight:400; }
+    .clear-btn { font-family:'Inter',sans-serif; font-size:.7rem; color:var(--dimmer); cursor:pointer; background:none; border:none; transition:color .2s; }
+    .clear-btn:hover { color:var(--red); }
 
-/* CARD GRIDS */
-.card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(105px,1fr)); gap:.85rem; }
-.anime-card { position:relative; border-radius:8px; overflow:hidden; aspect-ratio:2/3; background:var(--surface); cursor:pointer; transition:transform .2s; }
-.anime-card:hover { transform:translateY(-3px); }
-.anime-card img { width:100%; height:100%; object-fit:cover; display:block; }
-.ac-title { position:absolute; bottom:0; left:0; right:0; padding:5px 6px; background:linear-gradient(transparent,rgba(0,0,0,.92)); font-size:.6rem; color:var(--text); line-height:1.3; }
-.ac-badge { position:absolute; top:5px; left:5px; font-size:.6rem; padding:2px 6px; border-radius:8px; font-weight:600; }
-.ac-badge.fav  { background:rgba(232,160,48,.9); color:#1a0e00; }
-.ac-remove { position:absolute; top:5px; right:5px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.82); border:none; color:var(--red); font-size:.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
-.anime-card:hover .ac-remove { opacity:1; }
-.empty-state { grid-column:1/-1; text-align:center; padding:2.5rem 1rem; color:var(--dimmer); font-size:.85rem; font-style:italic; line-height:1.9; }
+    /* CARD GRIDS */
+    .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(105px,1fr)); gap:.85rem; }
+    .anime-card { position:relative; border-radius:8px; overflow:hidden; aspect-ratio:2/3; background:var(--surface); cursor:pointer; transition:transform .2s; }
+    .anime-card:hover { transform:translateY(-3px); }
+    .anime-card img { width:100%; height:100%; object-fit:cover; display:block; }
+    .ac-title { position:absolute; bottom:0; left:0; right:0; padding:5px 6px; background:linear-gradient(transparent,rgba(0,0,0,.92)); font-size:.6rem; color:var(--text); line-height:1.3; }
+    .ac-badge { position:absolute; top:5px; left:5px; font-size:.6rem; padding:2px 6px; border-radius:8px; font-weight:600; }
+    .ac-badge.fav  { background:rgba(232,160,48,.9); color:#1a0e00; }
+    .ac-remove { position:absolute; top:5px; right:5px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.82); border:none; color:var(--red); font-size:.65rem; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; }
+    .anime-card:hover .ac-remove { opacity:1; }
+    .empty-state { grid-column:1/-1; text-align:center; padding:2.5rem 1rem; color:var(--dimmer); font-size:.85rem; font-style:italic; line-height:1.9; }
 
-/* CHIPS */
-.q-section { margin-bottom:1.25rem; }
-.q-label { font-size:.73rem; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin-bottom:.65rem; font-weight:500; }
-.chips { display:flex; flex-wrap:wrap; gap:6px; }
-.chip { padding:5px 14px; border-radius:20px; border:.5px solid var(--border); background:var(--surface); color:#6a6585; cursor:pointer; font-size:.82rem; transition:all .2s; user-select:none; }
-.chip:hover { border-color:var(--purple); color:#c090e0; }
-.chip.sel-g { background:#1e0e2e; border-color:var(--purple); color:#d4a8f0; }
-.chip.sel-m { background:#0e1e2e; border-color:var(--blue); color:#90c0e8; }
-.chip.sel-l { background:#1e0a0a; border-color:var(--red); color:#e89080; }
+    /* CHIPS */
+    .q-section { margin-bottom:1.25rem; }
+    .q-label { font-size:.73rem; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin-bottom:.65rem; font-weight:500; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip { padding:5px 14px; border-radius:20px; border:.5px solid var(--border); background:var(--surface); color:#6a6585; cursor:pointer; font-size:.82rem; transition:all .2s; user-select:none; }
+    .chip:hover { border-color:var(--purple); color:#c090e0; }
+    .chip.sel-g { background:#1e0e2e; border-color:var(--purple); color:#d4a8f0; }
+    .chip.sel-m { background:#0e1e2e; border-color:var(--blue); color:#90c0e8; }
+    .chip.sel-l { background:#1e0a0a; border-color:var(--red); color:#e89080; }
 
-.rec-btn { width:100%; padding:.9rem; background:#1a0a20; border:1px solid var(--purple); border-radius:9px; color:#d4a8f0; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:.2em; cursor:pointer; transition:all .2s; margin-top:.5rem; }
-.rec-btn:hover:not(:disabled) { background:#2a0a35; box-shadow:0 0 24px rgba(142,68,173,.25); }
-.rec-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .rec-btn { width:100%; padding:.9rem; background:#1a0a20; border:1px solid var(--purple); border-radius:9px; color:#d4a8f0; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:.2em; cursor:pointer; transition:all .2s; margin-top:.5rem; }
+    .rec-btn:hover:not(:disabled) { background:#2a0a35; box-shadow:0 0 24px rgba(142,68,173,.25); }
+    .rec-btn:disabled { opacity:.4; cursor:not-allowed; }
 
-/* RANDOM PICKER BUTTON */
-.random-btn { width:100%; padding:.9rem; background:#0a1a20; border:1px solid var(--green); border-radius:9px; color:#90e8a0; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:.2em; cursor:pointer; transition:all .2s; margin-bottom:1.5rem; }
-.random-btn:hover:not(:disabled) { background:#0a2a15; box-shadow:0 0 24px rgba(39,174,96,.25); }
-.random-btn:disabled { opacity:.4; cursor:not-allowed; }
-.random-result { margin-top:1rem; padding:1rem; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; display:none; }
-.random-result.show { display:block; animation: fadeUp .3s ease; }
+    /* RANDOM PICKER BUTTON */
+    .random-btn { width:100%; padding:.9rem; background:#0a1a20; border:1px solid var(--green); border-radius:9px; color:#90e8a0; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:.2em; cursor:pointer; transition:all .2s; margin-bottom:1.5rem; }
+    .random-btn:hover:not(:disabled) { background:#0a2a15; box-shadow:0 0 24px rgba(39,174,96,.25); }
+    .random-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .random-result { margin-top:1rem; padding:1rem; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; display:none; }
+    .random-result.show { display:block; animation: fadeUp .3s ease; }
 
-/* RESULTS */
-.results-section { margin-top:1.75rem; }
-.results-heading { font-family:'Bebas Neue',sans-serif; font-size:.85rem; letter-spacing:.18em; color:var(--dim); margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:.5px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
-.results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; }
+    /* RESULTS */
+    .results-section { margin-top:1.75rem; }
+    .results-heading { font-family:'Bebas Neue',sans-serif; font-size:.85rem; letter-spacing:.18em; color:var(--dim); margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:.5px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
+    .results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; }
 
-.anime-poster { position:relative; border-radius:8px; overflow:hidden; background:var(--surface); transition:transform .2s, box-shadow .2s; }
-.anime-poster:hover { transform:translateY(-5px); box-shadow:0 10px 28px rgba(0,0,0,.6); }
-.anime-poster > img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
-.poster-info { padding:.5rem .65rem .65rem; }
-.poster-title { font-size:.77rem; font-weight:500; color:var(--text); line-height:1.35; margin-bottom:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.poster-score { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--red); }
-.poster-score span { font-family:'Inter',sans-serif; font-size:.65rem; color:var(--dim); margin-left:2px; }
+    .anime-poster { position:relative; border-radius:8px; overflow:hidden; background:var(--surface); transition:transform .2s, box-shadow .2s; }
+    .anime-poster:hover { transform:translateY(-5px); box-shadow:0 10px 28px rgba(0,0,0,.6); }
+    .anime-poster > img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
+    .poster-info { padding:.5rem .65rem .65rem; }
+    .poster-title { font-size:.77rem; font-weight:500; color:var(--text); line-height:1.35; margin-bottom:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .poster-score { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--red); }
+    .poster-score span { font-family:'Inter',sans-serif; font-size:.65rem; color:var(--dim); margin-left:2px; }
 
-/* HOVER OVERLAY */
-.poster-overlay {
-  position:absolute; left:0; right:0; bottom:0;
-  background:linear-gradient(to top, rgba(0,0,0,.96) 0%, rgba(0,0,0,.7) 70%, transparent 100%);
-  padding:2rem .6rem .6rem;
-  opacity:0; transition:opacity .22s ease;
-  pointer-events:none;
-  z-index:2;
-}
-.anime-poster:hover .poster-overlay { opacity:1; pointer-events:all; }
-.overlay-title {
-  font-size:.7rem; font-weight:500; color:#fff; line-height:1.3;
-  margin-bottom:.45rem;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-}
-.overlay-actions { display:flex; flex-direction:column; gap:.3rem; }
-.overlay-btn {
-  width:100%; padding:.36rem .5rem; border-radius:6px; border:none;
-  font-size:.7rem; font-weight:500; cursor:pointer;
-  transition:filter .15s, transform .1s; text-align:center; font-family:'Inter',sans-serif;
-}
-.overlay-btn:hover { filter:brightness(1.18); }
-.overlay-btn:active { transform:scale(0.97); }
-.ob-watch { background:#27ae60; color:#fff; }
-.ob-watch.added { background:#1e7e34; }
-.ob-detail { background:rgba(255,255,255,.1); color:#e0d8cc; }
+    /* HOVER OVERLAY */
+    .poster-overlay {
+      position:absolute; left:0; right:0; bottom:0;
+      background:linear-gradient(to top, rgba(0,0,0,.96) 0%, rgba(0,0,0,.7) 70%, transparent 100%);
+      padding:2rem .6rem .6rem;
+      opacity:0; transition:opacity .22s ease;
+      pointer-events:none;
+      z-index:2;
+    }
+    .anime-poster:hover .poster-overlay { opacity:1; pointer-events:all; }
+    .overlay-title {
+      font-size:.7rem; font-weight:500; color:#fff; line-height:1.3;
+      margin-bottom:.45rem;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+    }
+    .overlay-actions { display:flex; flex-direction:column; gap:.3rem; }
+    .overlay-btn {
+      width:100%; padding:.36rem .5rem; border-radius:6px; border:none;
+      font-size:.7rem; font-weight:500; cursor:pointer;
+      transition:filter .15s, transform .1s; text-align:center; font-family:'Inter',sans-serif;
+    }
+    .overlay-btn:hover { filter:brightness(1.18); }
+    .overlay-btn:active { transform:scale(0.97); }
+    .ob-watch { background:#27ae60; color:#fff; }
+    .ob-watch.added { background:#1e7e34; }
+    .ob-detail { background:rgba(255,255,255,.1); color:#e0d8cc; }
 
-/* SEASON/NEW BADGES */
-.season-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(46,204,113,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
-.new-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(231,76,60,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
+    /* SEASON/NEW BADGES */
+    .season-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(46,204,113,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
+    .new-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(231,76,60,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
 
-/* COUNTDOWN CARDS */
-.countdown-card { background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:1rem; margin-bottom:.75rem; transition:background .2s; }
-.countdown-card:hover { background:var(--surface2); }
-.countdown-header { display:flex; gap:.75rem; margin-bottom:.7rem; }
-.countdown-img { width:60px; height:85px; object-fit:cover; border-radius:6px; background:var(--surface2); flex-shrink:0; cursor:pointer; }
-.countdown-info { flex:1; min-width:0; }
-.countdown-title { font-size:.9rem; font-weight:600; color:var(--text); margin-bottom:.3rem; line-height:1.3; cursor:pointer; }
-.countdown-title:hover { color:var(--purple); }
-.countdown-meta { font-size:.75rem; color:var(--dim); }
-.countdown-timer { display:flex; gap:.5rem; align-items:center; }
-.countdown-box { flex:1; text-align:center; background:var(--surface2); border-radius:6px; padding:.4rem .3rem; }
-.countdown-num { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--red); line-height:1; }
-.countdown-label { font-size:.6rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+    /* COUNTDOWN CARDS */
+    .countdown-card { background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:1rem; margin-bottom:.75rem; transition:background .2s; }
+    .countdown-card:hover { background:var(--surface2); }
+    .countdown-header { display:flex; gap:.75rem; margin-bottom:.7rem; }
+    .countdown-img { width:60px; height:85px; object-fit:cover; border-radius:6px; background:var(--surface2); flex-shrink:0; cursor:pointer; }
+    .countdown-info { flex:1; min-width:0; }
+    .countdown-title { font-size:.9rem; font-weight:600; color:var(--text); margin-bottom:.3rem; line-height:1.3; cursor:pointer; }
+    .countdown-title:hover { color:var(--purple); }
+    .countdown-meta { font-size:.75rem; color:var(--dim); }
+    .countdown-timer { display:flex; gap:.5rem; align-items:center; }
+    .countdown-box { flex:1; text-align:center; background:var(--surface2); border-radius:6px; padding:.4rem .3rem; }
+    .countdown-num { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--red); line-height:1; }
+    .countdown-label { font-size:.6rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
 
-/* SEASONAL FILTERS */
-.season-filters { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
-.season-select { flex:1; min-width:120px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
-.season-select:focus { border-color:var(--purple); }
+    /* SEASONAL FILTERS */
+    .season-filters { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; margin-top:.5rem; }
+    .season-select { flex:1; min-width:120px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
+    .season-select:focus { border-color:var(--purple); }
 
-/* CONTROLS */
-.controls { display:flex; gap:.5rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
-.sort-select { flex:1; min-width:140px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
-.sort-select:focus { border-color:var(--purple); }
-.reset-btn { padding:.75rem 1.25rem; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; color:var(--dim); font-size:.85rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
-.reset-btn:hover { border-color:var(--purple); color:var(--text); }
+    /* CONTROLS */
+    .controls { display:flex; gap:.5rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
+    .sort-select { flex:1; min-width:140px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
+    .sort-select:focus { border-color:var(--purple); }
+    .reset-btn { padding:.75rem 1.25rem; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; color:var(--dim); font-size:.85rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
+    .reset-btn:hover { border-color:var(--purple); color:var(--text); }
 
-/* MODAL */
-.modal { position:fixed; inset:0; background:rgba(0,0,0,.88); backdrop-filter:blur(4px); z-index:100; display:none; align-items:center; justify-content:center; padding:1rem; overflow-y:auto; }
-.modal.show { display:flex; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from{opacity:0} to{opacity:1} }
-.modal-content { background:var(--surface); border:.5px solid var(--border); border-radius:12px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; position:relative; animation: slideUp .3s ease; }
-@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
-.modal-close { position:absolute; top:1rem; right:1rem; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,.5); border:none; color:var(--text); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
-.modal-close:hover { background:rgba(231,76,60,.8); }
-.modal-header { display:flex; gap:1rem; padding:1.5rem; border-bottom:.5px solid var(--border2); }
-.modal-poster { width:120px; flex-shrink:0; border-radius:8px; overflow:hidden; background:var(--surface2); }
-.modal-poster img { width:100%; aspect-ratio:2/3; object-fit:cover; }
-.modal-info { flex:1; }
-.modal-title { font-size:1.35rem; font-weight:600; color:var(--text); margin-bottom:.4rem; line-height:1.3; }
-.modal-title-jp { font-size:.8rem; color:var(--muted); margin-bottom:.7rem; font-style:italic; }
-.modal-meta { display:flex; flex-wrap:wrap; gap:.5rem; font-size:.8rem; color:var(--dim); margin-bottom:.7rem; }
-.modal-meta span { background:var(--surface2); padding:4px 10px; border-radius:6px; }
-.modal-score { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; margin-top:.3rem; }
-.modal-body { padding:1.5rem; }
-.modal-section { margin-bottom:1.5rem; }
-.modal-section:last-child { margin-bottom:0; }
-.modal-label { font-size:.75rem; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin-bottom:.6rem; font-weight:500; }
-.modal-genres { display:flex; flex-wrap:wrap; gap:6px; }
-.modal-genre { padding:5px 12px; border-radius:16px; background:var(--surface2); border:.5px solid var(--border); font-size:.78rem; color:var(--muted); }
-.modal-synopsis { font-size:.88rem; line-height:1.7; color:var(--muted); }
-.modal-actions { display:flex; gap:.6rem; padding:0 1.5rem 1.5rem; }
-.modal-btn { flex:1; padding:.85rem; border-radius:9px; border:1px solid; font-family:'Bebas Neue',sans-serif; font-size:1.05rem; letter-spacing:.15em; cursor:pointer; transition:all .2s; text-align:center; }
-.modal-btn-fav { background:transparent; border-color:var(--gold); color:var(--gold); }
-.modal-btn-fav:hover { background:rgba(232,160,48,.15); }
-.modal-btn-fav.added { background:var(--gold); color:#1a0e00; }
-.modal-btn-want { background:transparent; border-color:var(--green); color:var(--green); }
-.modal-btn-want:hover { background:rgba(39,174,96,.15); }
-.modal-btn-want.added { background:var(--green); color:#fff; }
-.similar-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:.7rem; }
-.similar-card { position:relative; border-radius:6px; overflow:hidden; background:var(--surface2); cursor:pointer; transition:transform .2s; }
-.similar-card:hover { transform:translateY(-3px); }
-.similar-card img { width:100%; aspect-ratio:2/3; object-fit:cover; }
-.similar-title { padding:5px; font-size:.65rem; line-height:1.3; color:var(--muted); text-align:center; }
+    /* MODAL */
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.88); backdrop-filter:blur(4px); z-index:100; display:none; align-items:center; justify-content:center; padding:1rem; overflow-y:auto; }
+    .modal.show { display:flex; animation: fadeIn .25s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .modal-content { background:var(--surface); border:.5px solid var(--border); border-radius:12px; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; position:relative; animation: slideUp .3s ease; }
+    @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:none;opacity:1} }
+    .modal-close { position:absolute; top:1rem; right:1rem; width:32px; height:32px; border-radius:50%; background:rgba(0,0,0,.5); border:none; color:var(--text); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .2s; }
+    .modal-close:hover { background:rgba(231,76,60,.8); }
+    .modal-header { display:flex; gap:1rem; padding:1.5rem; border-bottom:.5px solid var(--border2); }
+    .modal-poster { width:120px; flex-shrink:0; border-radius:8px; overflow:hidden; background:var(--surface2); }
+    .modal-poster img { width:100%; aspect-ratio:2/3; object-fit:cover; }
+    .modal-info { flex:1; }
+    .modal-title { font-size:1.35rem; font-weight:600; color:var(--text); margin-bottom:.4rem; line-height:1.3; }
+    .modal-title-jp { font-size:.8rem; color:var(--muted); margin-bottom:.7rem; font-style:italic; }
+    .modal-meta { display:flex; flex-wrap:wrap; gap:.5rem; font-size:.8rem; color:var(--dim); margin-bottom:.7rem; }
+    .modal-meta span { background:var(--surface2); padding:4px 10px; border-radius:6px; }
+    .modal-score { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; margin-top:.3rem; }
+    .modal-body { padding:1.5rem; }
+    .modal-section { margin-bottom:1.5rem; }
+    .modal-section:last-child { margin-bottom:0; }
+    .modal-label { font-size:.75rem; letter-spacing:.13em; text-transform:uppercase; color:var(--dim); margin-bottom:.6rem; font-weight:500; }
+    .modal-genres { display:flex; flex-wrap:wrap; gap:6px; }
+    .modal-genre { padding:5px 12px; border-radius:16px; background:var(--surface2); border:.5px solid var(--border); font-size:.78rem; color:var(--muted); }
+    .modal-synopsis { font-size:.88rem; line-height:1.7; color:var(--muted); }
+    .modal-actions { display:flex; gap:.6rem; padding:0 1.5rem 1.5rem; }
+    .modal-btn { flex:1; padding:.85rem; border-radius:9px; border:1px solid; font-family:'Bebas Neue',sans-serif; font-size:1.05rem; letter-spacing:.15em; cursor:pointer; transition:all .2s; text-align:center; }
+    .modal-btn-fav { background:transparent; border-color:var(--gold); color:var(--gold); }
+    .modal-btn-fav:hover { background:rgba(232,160,48,.15); }
+    .modal-btn-fav.added { background:var(--gold); color:#1a0e00; }
+    .modal-btn-want { background:transparent; border-color:var(--green); color:var(--green); }
+    .modal-btn-want:hover { background:rgba(39,174,96,.15); }
+    .modal-btn-want.added { background:var(--green); color:#fff; }
+    .similar-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:.7rem; }
+    .similar-card { position:relative; border-radius:6px; overflow:hidden; background:var(--surface2); cursor:pointer; transition:transform .2s; }
+    .similar-card:hover { transform:translateY(-3px); }
+    .similar-card img { width:100%; aspect-ratio:2/3; object-fit:cover; }
+    .similar-title { padding:5px; font-size:.65rem; line-height:1.3; color:var(--muted); text-align:center; }
 
-.err { background:#2a0a0a; border:.5px solid var(--red); border-radius:9px; padding:1rem; color:#e89080; font-size:.85rem; text-align:center; }
-.loading { text-align:center; padding:2rem; color:var(--dim); font-size:.85rem; }
+    .err { background:#2a0a0a; border:.5px solid var(--red); border-radius:9px; padding:1rem; color:#e89080; font-size:.85rem; text-align:center; }
+    .loading { text-align:center; padding:2rem; color:var(--dim); font-size:.85rem; }
 
-/* LOVED CARDS REMOVE HINT */
-.loved-card { position:relative; }
-.loved-hint { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:.55rem; color:var(--dimmer); background:rgba(0,0,0,.7); padding:3px; opacity:0; transition:opacity .2s; pointer-events:none; }
-.loved-card:hover .loved-hint { opacity:1; }
-.loved-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.95) 0%, transparent 60%); padding:0 .4rem .4rem; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transition:opacity .22s; pointer-events:none; }
-.loved-card:hover .loved-overlay { opacity:1; pointer-events:all; }
-.loved-btns { display:flex; gap:.25rem; margin-bottom:.3rem; }
-.loved-btn { flex:1; padding:.3rem; border-radius:5px; border:none; font-size:.62rem; font-weight:500; cursor:pointer; transition:filter .15s; font-family:'Inter',sans-serif; }
-.loved-btn:hover { filter:brightness(1.2); }
-.loved-btn-want { background:#27ae60; color:#fff; }
-.loved-btn-detail { background:rgba(255,255,255,.15); color:#e0d8cc; }
+    /* LOVED CARDS REMOVE HINT */
+    .loved-card { position:relative; }
+    .loved-hint { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:.55rem; color:var(--dimmer); background:rgba(0,0,0,.7); padding:3px; opacity:0; transition:opacity .2s; pointer-events:none; }
+    .loved-card:hover .loved-hint { opacity:1; }
+    .loved-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,.95) 0%, transparent 60%); padding:0 .4rem .4rem; display:flex; flex-direction:column; justify-content:flex-end; opacity:0; transition:opacity .22s; pointer-events:none; }
+    .loved-card:hover .loved-overlay { opacity:1; pointer-events:all; }
+    .loved-btns { display:flex; gap:.25rem; margin-bottom:.3rem; }
+    .loved-btn { flex:1; padding:.3rem; border-radius:5px; border:none; font-size:.62rem; font-weight:500; cursor:pointer; transition:filter .15s; font-family:'Inter',sans-serif; }
+    .loved-btn:hover { filter:brightness(1.2); }
+    .loved-btn-want { background:#27ae60; color:#fff; }
+    .loved-btn-detail { background:rgba(255,255,255,.15); color:#e0d8cc; }
 
-/* LOAD MORE */
-.load-more { width:100%; padding:.85rem; background:var(--surface); border:.5px solid var(--border); border-radius:9px; color:var(--purple); font-family:'Inter',sans-serif; font-size:.88rem; font-weight:500; cursor:pointer; transition:all .2s; margin-top:1rem; }
-.load-more:hover:not(:disabled) { background:var(--surface2); border-color:var(--purple); }
-.load-more:disabled { opacity:.4; cursor:not-allowed; }
+    /* LOAD MORE */
+    .load-more { width:100%; padding:.85rem; background:var(--surface); border:.5px solid var(--border); border-radius:9px; color:var(--purple); font-family:'Inter',sans-serif; font-size:.88rem; font-weight:500; cursor:pointer; transition:all .2s; margin-top:1rem; }
+    .load-more:hover:not(:disabled) { background:var(--surface2); border-color:var(--purple); }
+    .load-more:disabled { opacity:.4; cursor:not-allowed; }
 
-@media(max-width:640px) {
-  .tabs { 
-    font-size:.75rem; 
-    padding: 5px;
-    gap: 3px;
-  }
-  .tab { 
-    padding:.6rem .6rem; 
-    min-width:70px; 
-    font-size:.8rem;
-  }
-  .logo { font-size:2.5rem; }
-}
-```
-
+    @media(max-width:640px) {
+      .tabs { 
+        font-size:.75rem; 
+        padding: 5px;
+        gap: 3px;
+      }
+      .tab { 
+        padding:.6rem .6rem; 
+        min-width:70px; 
+        font-size:.8rem;
+      }
+      .logo { font-size:2.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -314,206 +310,201 @@
       <div class="tagline">Your personal anime finder</div>
     </div>
 
-```
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('list', this)">My List</div>
-  <div class="tab" onclick="switchTab('search', this)">Search</div>
-  <div class="tab" onclick="switchTab('seasonal', this)">This Season</div>
-  <div class="tab" onclick="switchTab('trending', this)">Trending</div>
-  <div class="tab" onclick="switchTab('foryou', this)">For You</div>
-</div>
-
-<!-- MY LIST TAB -->
-<div id="panel-list" class="panel active">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="list-search" placeholder="Search anime to add..." autocomplete="off">
-  </div>
-  <div class="search-results" id="list-search-results"></div>
-
-  <!-- RANDOM PICKER -->
-  <button class="random-btn" onclick="pickRandom()" id="random-btn">🎲 Pick Something For Me</button>
-  <div class="random-result" id="random-result"></div>
-
-  <div class="list-section">
-    <div class="section-divider">
-      <span>⭐ Favorites <span class="section-count" id="fav-count">(0)</span></span>
-      <button class="clear-btn" onclick="clearList('favorites')">Clear all</button>
-    </div>
-    <div class="card-grid" id="favorites-grid">
-      <div class="empty-state">No favorites yet.<br>Search above to add anime.</div>
-    </div>
-  </div>
-
-  <div class="list-section">
-    <div class="section-divider">
-      <span>📋 Want to Watch <span class="section-count" id="want-count">(0)</span></span>
-      <button class="clear-btn" onclick="clearList('want_to_watch')">Clear all</button>
-    </div>
-    <div class="card-grid" id="want-grid">
-      <div class="empty-state">Nothing on your list yet.<br>Search above to add anime.</div>
-    </div>
-  </div>
-</div>
-
-<!-- SEARCH TAB -->
-<div id="panel-search" class="panel">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="main-search" placeholder="Search anime..." autocomplete="off">
-  </div>
-
-  <div class="controls">
-    <select class="sort-select" id="search-sort" onchange="sortSearchResults()">
-      <option value="score">★ Rating</option>
-      <option value="rank">Rank</option>
-      <option value="title">A–Z</option>
-      <option value="year_desc">Newest</option>
-      <option value="year_asc">Oldest</option>
-      <option value="popularity">Popularity</option>
-      <option value="members">Members</option>
-    </select>
-  </div>
-
-  <div id="search-results-area"></div>
-
-  <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
-
-  <div class="q-section">
-    <div class="q-label">Browse by Studio</div>
-    <div class="chips" id="studio-chips"></div>
-  </div>
-
-  <div id="studio-results-area"></div>
-
-  <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
-
-  <div class="q-section">
-    <div class="q-label">Browse by Tags</div>
-    
-    <div class="controls" style="margin-bottom:.75rem">
-      <select class="sort-select" id="tag-sort">
-        <option value="score">★ Rating</option>
-        <option value="rank">Rank</option>
-        <option value="title">A–Z</option>
-        <option value="year_desc">Newest</option>
-        <option value="year_asc">Oldest</option>
-        <option value="popularity">Popularity</option>
-        <option value="members">Members</option>
-      </select>
-      <button class="reset-btn" onclick="resetTags()">↺ Reset</button>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('list', this)">My List</div>
+      <div class="tab" onclick="switchTab('search', this)">Search</div>
+      <div class="tab" onclick="switchTab('seasonal', this)">This Season</div>
+      <div class="tab" onclick="switchTab('trending', this)">Trending</div>
+      <div class="tab" onclick="switchTab('foryou', this)">For You</div>
     </div>
 
-    <div style="margin-bottom:.85rem">
-      <div class="q-label">Genres (multi-select)</div>
-      <div class="chips" id="genre-chips"></div>
+    <!-- MY LIST TAB -->
+    <div id="panel-list" class="panel active">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="list-search" placeholder="Search anime to add..." autocomplete="off">
+      </div>
+      <div class="search-results" id="list-search-results"></div>
+
+      <!-- RANDOM PICKER -->
+      <button class="random-btn" onclick="pickRandom()" id="random-btn">🎲 Pick Something For Me</button>
+      <div class="random-result" id="random-result"></div>
+
+      <div class="list-section">
+        <div class="section-divider">
+          <span>⭐ Favorites <span class="section-count" id="fav-count">(0)</span></span>
+          <button class="clear-btn" onclick="clearList('favorites')">Clear all</button>
+        </div>
+        <div class="card-grid" id="favorites-grid">
+          <div class="empty-state">No favorites yet.<br>Search above to add anime.</div>
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="section-divider">
+          <span>📋 Want to Watch <span class="section-count" id="want-count">(0)</span></span>
+          <button class="clear-btn" onclick="clearList('want_to_watch')">Clear all</button>
+        </div>
+        <div class="card-grid" id="want-grid">
+          <div class="empty-state">Nothing on your list yet.<br>Search above to add anime.</div>
+        </div>
+      </div>
     </div>
-    <div style="margin-bottom:.85rem">
-      <div class="q-label">Min Rating</div>
-      <div class="chips" id="rating-chips"></div>
+
+    <!-- SEARCH TAB -->
+    <div id="panel-search" class="panel">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="main-search" placeholder="Search anime..." autocomplete="off">
+      </div>
+
+      <div class="controls">
+        <select class="sort-select" id="search-sort" onchange="sortSearchResults()">
+          <option value="score">★ Rating</option>
+          <option value="rank">Rank</option>
+          <option value="title">A–Z</option>
+          <option value="year_desc">Newest</option>
+          <option value="year_asc">Oldest</option>
+          <option value="popularity">Popularity</option>
+          <option value="members">Members</option>
+        </select>
+      </div>
+
+      <div id="search-results-area"></div>
+
+      <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
+
+      <div class="q-section">
+        <div class="q-label">Browse by Studio</div>
+        <div class="chips" id="studio-chips"></div>
+      </div>
+
+      <div id="studio-results-area"></div>
+
+      <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
+
+      <div class="q-section">
+        <div class="q-label">Browse by Tags</div>
+        
+        <div class="controls" style="margin-bottom:.75rem">
+          <select class="sort-select" id="tag-sort">
+            <option value="score">★ Rating</option>
+            <option value="rank">Rank</option>
+            <option value="title">A–Z</option>
+            <option value="year_desc">Newest</option>
+            <option value="year_asc">Oldest</option>
+            <option value="popularity">Popularity</option>
+            <option value="members">Members</option>
+          </select>
+          <button class="reset-btn" onclick="resetTags()">↺ Reset</button>
+        </div>
+
+        <div style="margin-bottom:.85rem">
+          <div class="q-label">Genres (multi-select)</div>
+          <div class="chips" id="genre-chips"></div>
+        </div>
+        <div style="margin-bottom:.85rem">
+          <div class="q-label">Min Rating</div>
+          <div class="chips" id="rating-chips"></div>
+        </div>
+        <div style="margin-bottom:.85rem">
+          <div class="q-label">Format</div>
+          <div class="chips" id="format-chips"></div>
+        </div>
+        <button class="rec-btn" onclick="findByTags()">Find My Anime</button>
+      </div>
+
+      <div id="tag-results-area"></div>
     </div>
-    <div style="margin-bottom:.85rem">
-      <div class="q-label">Format</div>
-      <div class="chips" id="format-chips"></div>
+
+    <!-- SEASONAL TAB -->
+    <div id="panel-seasonal" class="panel">
+      <div class="q-section">
+        <div class="q-label">🔥 New Releases (Last 30 Days)</div>
+        <div id="new-releases-area"></div>
+      </div>
+
+      <div class="q-section" style="margin-top:2rem">
+        <div class="q-label">📺 Season Anime</div>
+        <div class="season-filters">
+          <select class="season-select" id="season-year" onchange="loadSeasonalAnime()"></select>
+          <select class="season-select" id="season-name" onchange="loadSeasonalAnime()">
+            <option value="winter">Winter</option>
+            <option value="spring">Spring</option>
+            <option value="summer">Summer</option>
+            <option value="fall">Fall</option>
+          </select>
+        </div>
+        <div id="seasonal-area"></div>
+      </div>
     </div>
-    <button class="rec-btn" onclick="findByTags()">Find My Anime</button>
-  </div>
 
-  <div id="tag-results-area"></div>
-</div>
+    <!-- TRENDING TAB -->
+    <div id="panel-trending" class="panel">
+      <div class="q-section">
+        <div class="q-label">🔥 Trending This Week</div>
+        <div id="trending-area"></div>
+      </div>
 
-<!-- SEASONAL TAB -->
-<div id="panel-seasonal" class="panel">
-  <div class="season-filters">
-    <select class="season-select" id="season-year" onchange="loadSeasonalAnime()"></select>
-    <select class="season-select" id="season-name" onchange="loadSeasonalAnime()">
-      <option value="winter">Winter</option>
-      <option value="spring">Spring</option>
-      <option value="summer">Summer</option>
-      <option value="fall">Fall</option>
-    </select>
-  </div>
+      <div class="q-section" style="margin-top:2rem">
+        <div class="q-label">⏰ Airing Soon - Next Episodes</div>
+        <div id="airing-countdown-area"></div>
+      </div>
 
-  <div class="q-section">
-    <div class="q-label">🔥 New Releases (Last 30 Days)</div>
-    <div id="new-releases-area"></div>
-  </div>
-
-  <div class="q-section" style="margin-top:2rem">
-    <div class="q-label">📺 Currently Airing</div>
-    <div id="seasonal-area"></div>
-  </div>
-</div>
-
-<!-- TRENDING TAB -->
-<div id="panel-trending" class="panel">
-  <div class="q-section">
-    <div class="q-label">🔥 Trending This Week</div>
-    <div id="trending-area"></div>
-  </div>
-
-  <div class="q-section" style="margin-top:2rem">
-    <div class="q-label">⏰ Airing Soon - Next Episodes</div>
-    <div id="airing-countdown-area"></div>
-  </div>
-
-  <div class="q-section" style="margin-top:2rem">
-    <div class="q-label">⭐ Most Popular</div>
-    <div id="popular-area"></div>
-  </div>
-</div>
-
-<!-- FOR YOU TAB -->
-<div id="panel-foryou" class="panel">
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" class="search-input" id="fy-search" placeholder="Search anime you've loved..." autocomplete="off">
-  </div>
-  <div class="search-results" id="fy-search-results"></div>
-
-  <div class="list-section">
-    <div class="section-divider">
-      <span>❤️ Loved Anime</span>
-      <button class="clear-btn" onclick="clearList('loved')">Clear all</button>
+      <div class="q-section" style="margin-top:2rem">
+        <div class="q-label">⭐ Most Popular</div>
+        <div id="popular-area"></div>
+      </div>
     </div>
-    <div class="card-grid" id="loved-grid">
-      <div class="empty-state">No loved anime yet.<br>Search above to add your favorites.</div>
+
+    <!-- FOR YOU TAB -->
+    <div id="panel-foryou" class="panel">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="fy-search" placeholder="Search anime you've loved..." autocomplete="off">
+      </div>
+      <div class="search-results" id="fy-search-results"></div>
+
+      <div class="list-section">
+        <div class="section-divider">
+          <span>❤️ Loved Anime</span>
+          <button class="clear-btn" onclick="clearList('loved')">Clear all</button>
+        </div>
+        <div class="card-grid" id="loved-grid">
+          <div class="empty-state">No loved anime yet.<br>Search above to add your favorites.</div>
+        </div>
+      </div>
+
+      <div class="q-section" style="margin-top:1.5rem">
+        <div class="q-label">Mood</div>
+        <div class="chips" id="mood-chips"></div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-label">Format</div>
+        <div class="chips" id="fy-format-chips"></div>
+      </div>
+
+      <div class="q-section">
+        <div class="q-label">Sort By</div>
+        <select class="sort-select" id="fy-sort" onchange="setFySort(this.value)">
+          <option value="votes">Best Match</option>
+          <option value="score">★ Rating</option>
+          <option value="rank">Rank</option>
+          <option value="title">A–Z</option>
+          <option value="year_desc">Newest</option>
+          <option value="year_asc">Oldest</option>
+          <option value="popularity">Popularity</option>
+        </select>
+      </div>
+
+      <button class="rec-btn" onclick="getForYou()" id="fy-btn">Get My Recommendations</button>
+      <div id="fy-status"></div>
+      <div id="fy-results"></div>
     </div>
-  </div>
-
-  <div class="q-section" style="margin-top:1.5rem">
-    <div class="q-label">Mood</div>
-    <div class="chips" id="mood-chips"></div>
-  </div>
-
-  <div class="q-section">
-    <div class="q-label">Format</div>
-    <div class="chips" id="fy-format-chips"></div>
-  </div>
-
-  <div class="q-section">
-    <div class="q-label">Sort By</div>
-    <select class="sort-select" id="fy-sort" onchange="setFySort(this.value)">
-      <option value="votes">Best Match</option>
-      <option value="score">★ Rating</option>
-      <option value="rank">Rank</option>
-      <option value="title">A–Z</option>
-      <option value="year_desc">Newest</option>
-      <option value="year_asc">Oldest</option>
-      <option value="popularity">Popularity</option>
-    </select>
-  </div>
-
-  <button class="rec-btn" onclick="getForYou()" id="fy-btn">Get My Recommendations</button>
-  <div id="fy-status"></div>
-  <div id="fy-results"></div>
-</div>
-```
-
   </div>
 
   <!-- MODAL -->
-
   <div class="modal" id="modal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeModal()">✕</button>
@@ -1355,18 +1346,17 @@
     area.innerHTML = `<div class="loading">Loading...</div>`;
     
     try {
-      const r = await fetch(`${JIKAN}/schedules`);
-      const d = await r.json();
-      const data = (d.data || []).slice(0, 8);
+      const data = await fetchWithRetry(`${JIKAN}/schedules`);
+      const animeList = (data.data || []).slice(0, 8);
       
-      if (!data.length) {
+      if (!animeList.length) {
         area.innerHTML = `<div class="empty-state">No upcoming episodes found.</div>`;
         return;
       }
       
-      area.innerHTML = data.map(a => {
+      area.innerHTML = animeList.map(a => {
         const id = a.mal_id;
-        const title = esc(a.title);
+        const title = esc(a.title || 'Unknown');
         const img = a.images?.jpg?.image_url || "";
         const broadcast = a.broadcast?.string || "Unknown";
         const nextEp = getNextBroadcastTime(a.broadcast);
@@ -1374,9 +1364,9 @@
         return `
           <div class="countdown-card">
             <div class="countdown-header">
-              <img src="${img}" alt="${title}" class="countdown-img" onclick="openModal(${id})">
+              <img src="${img}" alt="${title}" class="countdown-img" onclick="openModal(${id})" loading="lazy">
               <div class="countdown-info">
-                <div class="countdown-title" onclick="openModal(${id})">${a.title}</div>
+                <div class="countdown-title" onclick="openModal(${id})">${a.title || 'Unknown'}</div>
                 <div class="countdown-meta">${broadcast}</div>
               </div>
             </div>
@@ -1406,7 +1396,8 @@
       
       updateCountdowns();
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load airing schedule.</div>`;
+      console.error("Airing countdown load error:", e);
+      area.innerHTML = `<div class="err">Failed to load airing schedule: ${e.message}</div>`;
     }
   }
 
@@ -1501,6 +1492,8 @@
   ];
 
   let selectedStudio = null;
+  let studioResultsPage = 1;
+  let currentStudioResults = [];
 
   function initStudios() {
     const chips = document.getElementById("studio-chips");
@@ -1517,27 +1510,68 @@
     chips.querySelector(`[data-id="${id}"]`).classList.add("sel-g");
     
     selectedStudio = { id, name };
+    studioResultsPage = 1;
+    currentStudioResults = [];
     
     const area = document.getElementById("studio-results-area");
     area.innerHTML = `<div class="loading">Loading ${name} anime...</div>`;
     
     try {
-      const r = await fetch(`${JIKAN}/anime?producers=${id}&order_by=score&sort=desc&limit=24&sfw=true`);
-      const d = await r.json();
-      const data = d.data || [];
+      const data = await fetchWithRetry(`${JIKAN}/anime?producers=${id}&order_by=score&sort=desc&limit=24&sfw=true&page=1`);
+      currentStudioResults = data.data || [];
       
-      if (!data.length) {
+      if (!currentStudioResults.length) {
         area.innerHTML = `<div class="empty-state">No anime found for this studio.</div>`;
         return;
       }
       
-      area.innerHTML = `
-        <div class="results-section" style="margin-top:1.5rem">
-          <div class="results-heading"><span>${name} — Top Rated</span></div>
-          <div class="results-grid">${data.map(posterCard).join("")}</div>
-        </div>`;
+      renderStudioResults(name);
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load studio anime.</div>`;
+      console.error("Studio load error:", e);
+      area.innerHTML = `<div class="err">Failed to load studio anime: ${e.message}</div>`;
+    }
+  }
+
+  function renderStudioResults(name) {
+    const area = document.getElementById("studio-results-area");
+    const hasMore = currentStudioResults.length >= (studioResultsPage * 24);
+    
+    area.innerHTML = `
+      <div class="results-section" style="margin-top:1.5rem">
+        <div class="results-heading"><span>${name || selectedStudio.name} — Top Rated (${currentStudioResults.length} anime)</span></div>
+        <div class="results-grid">${currentStudioResults.map(posterCard).join("")}</div>
+        ${hasMore ? `<button class="load-more" onclick="loadMoreStudio()">Load More Anime</button>` : ''}
+      </div>`;
+  }
+
+  async function loadMoreStudio() {
+    if (!selectedStudio) return;
+    studioResultsPage++;
+    
+    const area = document.getElementById("studio-results-area");
+    const existingBtn = area.querySelector(".load-more");
+    if (existingBtn) {
+      existingBtn.disabled = true;
+      existingBtn.textContent = "Loading...";
+    }
+    
+    try {
+      const data = await fetchWithRetry(`${JIKAN}/anime?producers=${selectedStudio.id}&order_by=score&sort=desc&limit=24&sfw=true&page=${studioResultsPage}`);
+      const newData = data.data || [];
+      
+      if (!newData.length) {
+        if (existingBtn) existingBtn.textContent = "No more anime";
+        return;
+      }
+      
+      currentStudioResults = [...currentStudioResults, ...newData];
+      renderStudioResults(selectedStudio.name);
+    } catch (e) {
+      console.error("Load more studio error:", e);
+      if (existingBtn) {
+        existingBtn.textContent = "Load Failed - Try Again";
+        existingBtn.disabled = false;
+      }
     }
   }
 
@@ -2029,6 +2063,5 @@
     }
   });
 </script>
-
 </body>
 </html>
