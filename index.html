@@ -1625,10 +1625,31 @@
       const studio = (a.studios || [])[0]?.name || "N/A";
       const synopsis = a.synopsis || "No synopsis available.";
       
-      // Check if currently airing and has broadcast info
-      const isAiring = a.status === "Currently Airing" && a.broadcast;
-      const nextEp = isAiring ? getNextBroadcastTime(a.broadcast) : null;
-      const broadcastStr = a.broadcast?.string || "";
+      // Check if currently airing
+      const isAiring = a.status === "Currently Airing";
+      let nextEp = null;
+      let broadcastStr = "";
+      
+      if (isAiring) {
+        if (a.broadcast?.day && a.broadcast?.time) {
+          // Has broadcast info in detail
+          nextEp = getNextBroadcastTime(a.broadcast);
+          broadcastStr = a.broadcast.string || "";
+        } else {
+          // Try to get from schedules endpoint
+          try {
+            const schedRes = await fetch(`${JIKAN}/schedules`);
+            const schedData = await schedRes.json();
+            const found = (schedData.data || []).find(anime => anime.mal_id === id);
+            if (found && found.broadcast?.day && found.broadcast?.time) {
+              nextEp = getNextBroadcastTime(found.broadcast);
+              broadcastStr = found.broadcast.string || "";
+            }
+          } catch (e) {
+            // Schedule fetch failed, continue without countdown
+          }
+        }
+      }
 
       body.innerHTML = `
         <div class="modal-header">
@@ -1648,7 +1669,7 @@
           </div>
         </div>
         
-        ${isAiring && nextEp ? `
+        ${isAiring ? (nextEp ? `
           <div style="padding:0 1.5rem">
             <div style="background:var(--surface2);border:.5px solid var(--border);border-radius:9px;padding:1rem;margin-bottom:1rem">
               <div style="font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem;font-weight:500">⏰ Next Episode</div>
@@ -1673,7 +1694,13 @@
               </div>
             </div>
           </div>
-        ` : ""}
+        ` : `
+          <div style="padding:0 1.5rem">
+            <div style="background:var(--surface2);border:.5px solid var(--border);border-radius:9px;padding:.8rem 1rem;margin-bottom:1rem;text-align:center">
+              <div style="font-size:.78rem;color:var(--muted)">📺 Currently Airing • Broadcast schedule not available</div>
+            </div>
+          </div>
+        `) : ""}
         
         <div class="modal-body">
           ${genres.length ? `
