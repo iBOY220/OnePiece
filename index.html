@@ -32,9 +32,67 @@
 .tagline { font-size:.75rem; color:var(--dim); letter-spacing:.18em; text-transform:uppercase; margin-top:.4rem; }
 
 /* TABS */
-.tabs { display:flex; background:var(--surface); border-radius:10px; padding:4px; margin-bottom:1.5rem; border:.5px solid var(--border); overflow-x: auto; }
-.tab { flex:1; padding:.65rem; text-align:center; cursor:pointer; border-radius:7px; font-size:.85rem; font-weight:500; color:var(--dim); transition:all .2s; user-select:none; white-space: nowrap; min-width: 90px; }
-.tab.active { background:var(--surface2); color:var(--text); }
+.tabs { 
+  display:flex; 
+  background:var(--surface); 
+  border-radius:12px; 
+  padding:6px; 
+  margin-bottom:1.5rem; 
+  border:.5px solid var(--border); 
+  overflow-x: auto;
+  gap:4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.tab { 
+  flex:1; 
+  padding:.7rem 1rem; 
+  text-align:center; 
+  cursor:pointer; 
+  border-radius:9px; 
+  font-size:.88rem; 
+  font-weight:500; 
+  color:var(--dim); 
+  transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); 
+  user-select:none; 
+  white-space: nowrap; 
+  min-width: 90px;
+  position: relative;
+  overflow: hidden;
+}
+.tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(142,68,173,.1), transparent);
+  transition: left .5s;
+}
+.tab:hover:not(.active)::before {
+  left: 100%;
+}
+.tab:hover:not(.active) {
+  color: var(--muted);
+  background: rgba(255,255,255,.02);
+}
+.tab.active { 
+  background: linear-gradient(135deg, var(--surface2) 0%, #1e1a28 100%);
+  color: var(--text);
+  box-shadow: 0 2px 12px rgba(142,68,173,.15), inset 0 1px 0 rgba(255,255,255,.05);
+  font-weight: 600;
+}
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--purple), transparent);
+  border-radius: 2px;
+}
 .panel { display:none; }
 .panel.active { display:block; animation: fadeUp .3s ease; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
@@ -232,8 +290,16 @@
 .load-more:disabled { opacity:.4; cursor:not-allowed; }
 
 @media(max-width:640px) {
-  .tabs { font-size:.75rem; }
-  .tab { padding:.55rem .4rem; min-width:70px; }
+  .tabs { 
+    font-size:.75rem; 
+    padding: 5px;
+    gap: 3px;
+  }
+  .tab { 
+    padding:.6rem .6rem; 
+    min-width:70px; 
+    font-size:.8rem;
+  }
   .logo { font-size:2.5rem; }
 }
 ```
@@ -254,7 +320,6 @@
   <div class="tab" onclick="switchTab('search')">Search</div>
   <div class="tab" onclick="switchTab('seasonal')">This Season</div>
   <div class="tab" onclick="switchTab('trending')">Trending</div>
-  <div class="tab" onclick="switchTab('studios')">Studios</div>
   <div class="tab" onclick="switchTab('foryou')">For You</div>
 </div>
 
@@ -311,6 +376,15 @@
   </div>
 
   <div id="search-results-area"></div>
+
+  <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
+
+  <div class="q-section">
+    <div class="q-label">Browse by Studio</div>
+    <div class="chips" id="studio-chips"></div>
+  </div>
+
+  <div id="studio-results-area"></div>
 
   <hr style="border:none;border-top:.5px solid var(--border2);margin:2rem 0">
 
@@ -387,16 +461,6 @@
     <div class="q-label">⭐ Most Popular</div>
     <div id="popular-area"></div>
   </div>
-</div>
-
-<!-- STUDIOS TAB -->
-<div id="panel-studios" class="panel">
-  <div class="q-section">
-    <div class="q-label">Featured Studios</div>
-    <div class="chips" id="studio-chips"></div>
-  </div>
-
-  <div id="studio-results-area"></div>
 </div>
 
 <!-- FOR YOU TAB -->
@@ -484,7 +548,7 @@
     document.getElementById(`panel-${name}`).classList.add("active");
     if (name === "seasonal") initSeasonal();
     if (name === "trending") initTrending();
-    if (name === "studios") initStudios();
+    if (name === "search") initStudios();
   }
 
   // SEARCH - MY LIST
@@ -653,6 +717,9 @@
   renderFavorites();
   renderWantToWatch();
   renderLoved();
+  
+  // Initialize studio chips on load
+  initStudios();
 
   // RANDOM PICKER - Smart recommendation based on favorites
   async function pickRandom() {
