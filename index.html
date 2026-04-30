@@ -1624,6 +1624,11 @@
       const genres = (a.genres || []).map(g => g.name);
       const studio = (a.studios || [])[0]?.name || "N/A";
       const synopsis = a.synopsis || "No synopsis available.";
+      
+      // Check if currently airing and has broadcast info
+      const isAiring = a.status === "Currently Airing" && a.broadcast;
+      const nextEp = isAiring ? getNextBroadcastTime(a.broadcast) : null;
+      const broadcastStr = a.broadcast?.string || "";
 
       body.innerHTML = `
         <div class="modal-header">
@@ -1642,6 +1647,34 @@
             <div class="modal-score" style="color:${scoreColor}">★ ${score} <span style="font-size:.9rem;color:var(--dim)">/ 10</span></div>
           </div>
         </div>
+        
+        ${isAiring && nextEp ? `
+          <div style="padding:0 1.5rem">
+            <div style="background:var(--surface2);border:.5px solid var(--border);border-radius:9px;padding:1rem;margin-bottom:1rem">
+              <div style="font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:.6rem;font-weight:500">⏰ Next Episode</div>
+              <div style="font-size:.78rem;color:var(--muted);margin-bottom:.6rem">${broadcastStr}</div>
+              <div class="countdown-timer" data-target="${nextEp.getTime()}" id="modal-countdown">
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="days">--</div>
+                  <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="hours">--</div>
+                  <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="mins">--</div>
+                  <div class="countdown-label">Mins</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="secs">--</div>
+                  <div class="countdown-label">Secs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ` : ""}
+        
         <div class="modal-body">
           ${genres.length ? `
             <div class="modal-section">
@@ -1683,6 +1716,11 @@
           </button>
         </div>
       `;
+      
+      // Start countdown if present
+      if (isAiring && nextEp) {
+        updateCountdowns();
+      }
     } catch (e) {
       body.innerHTML = `<div class="err" style="margin:2rem">Failed to load anime details.</div>`;
     }
