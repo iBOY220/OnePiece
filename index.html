@@ -219,13 +219,61 @@
 
     /* SEASONAL FILTERS */
     .season-filters { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; margin-top:.5rem; }
-    .season-select { flex:1; min-width:120px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
-    .season-select:focus { border-color:var(--purple); }
+    .season-select { 
+      flex:1; 
+      min-width:120px; 
+      background:var(--surface); 
+      border:.5px solid var(--border); 
+      border-radius:9px; 
+      padding:.75rem 2.5rem .75rem 1rem; 
+      color:var(--text); 
+      font-size:.95rem; 
+      font-family:'Inter',sans-serif; 
+      outline:none; 
+      cursor:pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e44ad' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      transition: all .2s;
+    }
+    .season-select:hover {
+      border-color:var(--purple);
+      background-color: var(--surface2);
+    }
+    .season-select:focus { 
+      border-color:var(--purple);
+      box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+    }
 
     /* CONTROLS */
     .controls { display:flex; gap:.5rem; align-items:center; margin-bottom:1rem; flex-wrap:wrap; }
-    .sort-select { flex:1; min-width:140px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
-    .sort-select:focus { border-color:var(--purple); }
+    .sort-select { 
+      flex:1; 
+      min-width:140px; 
+      background:var(--surface); 
+      border:.5px solid var(--border); 
+      border-radius:9px; 
+      padding:.75rem 2.5rem .75rem 1rem; 
+      color:var(--text); 
+      font-size:.95rem; 
+      font-family:'Inter',sans-serif; 
+      outline:none; 
+      cursor:pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e44ad' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      transition: all .2s;
+    }
+    .sort-select:hover {
+      border-color:var(--purple);
+      background-color: var(--surface2);
+    }
+    .sort-select:focus { 
+      border-color:var(--purple);
+      box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+    }
     .reset-btn { padding:.75rem 1.25rem; background:var(--surface2); border:.5px solid var(--border); border-radius:9px; color:var(--dim); font-size:.85rem; font-weight:500; cursor:pointer; transition:all .2s; font-family:'Inter',sans-serif; }
     .reset-btn:hover { border-color:var(--purple); color:var(--text); }
 
@@ -313,6 +361,9 @@
         font-size:.8rem;
       }
       .logo { font-size:2.5rem; }
+      #panel-trending > div > div { 
+        grid-template-columns: 1fr !important;
+      }
     }
   </style>
 </head>
@@ -364,21 +415,21 @@
 
       <div class="list-section">
         <div class="section-divider">
-          <span>📋 Want to Watch <span class="section-count" id="want-count">(0)</span></span>
-          <button class="clear-btn" onclick="clearList('want_to_watch')">Clear all</button>
-        </div>
-        <div class="card-grid" id="want-grid">
-          <div class="empty-state">Nothing on your list yet.<br>Search above to add anime.</div>
-        </div>
-      </div>
-
-      <div class="list-section">
-        <div class="section-divider">
           <span>✅ Watched <span class="section-count" id="watched-count">(0)</span></span>
           <button class="clear-btn" onclick="clearList('watched')">Clear all</button>
         </div>
         <div class="card-grid" id="watched-grid">
           <div class="empty-state">No watched anime yet.<br>Mark anime as watched from details.</div>
+        </div>
+      </div>
+
+      <div class="list-section">
+        <div class="section-divider">
+          <span>📋 Want to Watch <span class="section-count" id="want-count">(0)</span></span>
+          <button class="clear-btn" onclick="clearList('want_to_watch')">Clear all</button>
+        </div>
+        <div class="card-grid" id="want-grid">
+          <div class="empty-state">Nothing on your list yet.<br>Search above to add anime.</div>
         </div>
       </div>
     </div>
@@ -474,18 +525,24 @@
     <!-- TRENDING TAB -->
     <div id="panel-trending" class="panel">
       <div class="q-section">
-        <div class="q-label">🔥 Trending This Week</div>
-        <div id="trending-area"></div>
-      </div>
-
-      <div class="q-section" style="margin-top:2rem">
-        <div class="q-label">⏰ Airing Soon - Next Episodes</div>
-        <div id="airing-countdown-area"></div>
-      </div>
-
-      <div class="q-section" style="margin-top:2rem">
         <div class="q-label">⭐ Most Popular</div>
         <div id="popular-area"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;margin-top:2rem">
+        <div>
+          <div class="q-section">
+            <div class="q-label">🔥 Trending This Week</div>
+            <div id="trending-area"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="q-section">
+            <div class="q-label">⏰ Airing Soon</div>
+            <div id="airing-countdown-area"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1710,17 +1767,23 @@
       const excludeIds = new Set(loved.map(x => x.id));
       results = results.filter(a => !excludeIds.has(a.mal_id));
 
-      // Enrich scores
+      // Enrich ALL results with full data
       const enrichPromises = results.slice(0, 50).map(a => 
-        (!a.score || a.score === 0) ? 
-          fetch(`${JIKAN}/anime/${a.mal_id}`)
-            .then(r => r.json())
-            .then(d => { 
-              if (d.data?.score) a.score = d.data.score;
-              if (d.data?.genres) a.genres = d.data.genres;
-            })
-            .catch(() => {}) 
-        : Promise.resolve()
+        fetch(`${JIKAN}/anime/${a.mal_id}`)
+          .then(r => r.json())
+          .then(d => { 
+            if (d.data) {
+              a.score = d.data.score;
+              a.genres = d.data.genres;
+              a.images = d.data.images;
+              a.type = d.data.type;
+              a.aired = d.data.aired;
+              a.rank = d.data.rank;
+              a.popularity = d.data.popularity;
+              a.members = d.data.members;
+            }
+          })
+          .catch(() => {})
       );
       await Promise.all(enrichPromises);
 
