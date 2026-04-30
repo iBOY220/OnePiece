@@ -1137,14 +1137,20 @@
   // SEASONAL TAB
   function initSeasonal() {
     const yearSelect = document.getElementById("season-year");
+    const seasonSelect = document.getElementById("season-name");
+    
     if (yearSelect.options.length > 0) {
-      // Already initialized, just reload
+      // Already initialized, just reload with current values
+      console.log("Re-initializing seasonal with:", yearSelect.value, seasonSelect.value);
       loadSeasonalAnime();
       loadNewReleases();
       return;
     }
     
     const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
+    
+    // Populate year dropdown
     for (let y = currentYear; y >= 1990; y--) {
       const opt = document.createElement("option");
       opt.value = y;
@@ -1152,40 +1158,51 @@
       yearSelect.appendChild(opt);
     }
     
-    // Set current season
-    const month = new Date().getMonth();
-    const seasonName = document.getElementById("season-name");
-    if (month >= 0 && month <= 2) seasonName.value = "winter";
-    else if (month >= 3 && month <= 5) seasonName.value = "spring";
-    else if (month >= 6 && month <= 8) seasonName.value = "summer";
-    else seasonName.value = "fall";
+    // Set current year as default
+    yearSelect.value = currentYear;
     
-    loadSeasonalAnime();
-    loadNewReleases();
+    // Set current season based on month
+    if (currentMonth >= 0 && currentMonth <= 2) seasonSelect.value = "winter";
+    else if (currentMonth >= 3 && currentMonth <= 5) seasonSelect.value = "spring";
+    else if (currentMonth >= 6 && currentMonth <= 8) seasonSelect.value = "summer";
+    else seasonSelect.value = "fall";
+    
+    console.log("Initialized seasonal with:", yearSelect.value, seasonSelect.value);
+    
+    // Load with a small delay to ensure DOM is ready
+    setTimeout(() => {
+      loadSeasonalAnime();
+      loadNewReleases();
+    }, 100);
   }
 
   async function loadSeasonalAnime() {
     const year = document.getElementById("season-year").value;
     const season = document.getElementById("season-name").value;
     
-    if (!year || !season) return;
+    console.log("Loading seasonal anime:", { year, season }); // Debug log
+    
+    if (!year || !season) {
+      console.error("Missing year or season");
+      return;
+    }
     
     const area = document.getElementById("seasonal-area");
     area.innerHTML = `<div class="loading">Loading ${season} ${year} anime...</div>`;
     
     try {
-      const r = await fetch(`${JIKAN}/seasons/${year}/${season}`);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const d = await r.json();
-      const data = (d.data || []).slice(0, 24);
-      if (!data.length) {
+      const data = await fetchWithRetry(`${JIKAN}/seasons/${year}/${season}`);
+      console.log("Seasonal data received:", data); // Debug log
+      
+      const animeList = (data.data || []).slice(0, 24);
+      if (!animeList.length) {
         area.innerHTML = `<div class="empty-state">No anime found for ${season} ${year}.</div>`;
         return;
       }
-      area.innerHTML = `<div class="results-grid">${data.map(a => seasonalCard(a)).join("")}</div>`;
+      area.innerHTML = `<div class="results-grid">${animeList.map(a => seasonalCard(a)).join("")}</div>`;
     } catch (e) {
       console.error("Seasonal load error:", e);
-      area.innerHTML = `<div class="err">Failed to load seasonal anime. Try a different season.</div>`;
+      area.innerHTML = `<div class="err">Failed to load seasonal anime: ${e.message}</div>`;
     }
   }
 
@@ -1197,11 +1214,9 @@
       // Get anime from last 30 days
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const startDate = thirtyDaysAgo.toISOString().split('T')[0];
       
-      const r = await fetch(`${JIKAN}/seasons/now?limit=24`);
-      const d = await r.json();
-      const data = (d.data || [])
+      const data = await fetchWithRetry(`${JIKAN}/seasons/now?limit=24`);
+      const animeList = (data.data || [])
         .filter(a => {
           const airedFrom = a.aired?.from;
           if (!airedFrom) return false;
@@ -1210,13 +1225,14 @@
         })
         .slice(0, 12);
       
-      if (!data.length) {
+      if (!animeList.length) {
         area.innerHTML = `<div class="empty-state" style="padding:1.5rem">No new releases in the last 30 days.</div>`;
         return;
       }
-      area.innerHTML = `<div class="results-grid">${data.map(a => newReleaseCard(a)).join("")}</div>`;
+      area.innerHTML = `<div class="results-grid">${animeList.map(a => newReleaseCard(a)).join("")}</div>`;
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load new releases.</div>`;
+      console.error("New releases load error:", e);
+      area.innerHTML = `<div class="err">Failed to load new releases: ${e.message}</div>`;
     }
   }
 
@@ -1301,17 +1317,17 @@
     area.innerHTML = `<div class="loading">Loading...</div>`;
     
     try {
-      const r = await fetch(`${JIKAN}/top/anime?filter=airing&limit=12`);
-      const d = await r.json();
-      const data = d.data || [];
+      const data = await fetchWithRetry(`${JIKAN}/top/anime?filter=airing&limit=12`);
+      const animeList = data.data || [];
       
-      if (!data.length) {
+      if (!animeList.length) {
         area.innerHTML = `<div class="empty-state">No trending anime found.</div>`;
         return;
       }
-      area.innerHTML = `<div class="results-grid">${data.map(posterCard).join("")}</div>`;
+      area.innerHTML = `<div class="results-grid">${animeList.map(posterCard).join("")}</div>`;
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load trending anime.</div>`;
+      console.error("Trending load error:", e);
+      area.innerHTML = `<div class="err">Failed to load trending anime: ${e.message}</div>`;
     }
   }
 
@@ -1320,17 +1336,17 @@
     area.innerHTML = `<div class="loading">Loading...</div>`;
     
     try {
-      const r = await fetch(`${JIKAN}/top/anime?filter=bypopularity&limit=12`);
-      const d = await r.json();
-      const data = d.data || [];
+      const data = await fetchWithRetry(`${JIKAN}/top/anime?filter=bypopularity&limit=12`);
+      const animeList = data.data || [];
       
-      if (!data.length) {
+      if (!animeList.length) {
         area.innerHTML = `<div class="empty-state">No popular anime found.</div>`;
         return;
       }
-      area.innerHTML = `<div class="results-grid">${data.map(posterCard).join("")}</div>`;
+      area.innerHTML = `<div class="results-grid">${animeList.map(posterCard).join("")}</div>`;
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load popular anime.</div>`;
+      console.error("Popular load error:", e);
+      area.innerHTML = `<div class="err">Failed to load popular anime: ${e.message}</div>`;
     }
   }
 
