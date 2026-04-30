@@ -147,6 +147,20 @@
 .season-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(46,204,113,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
 .new-badge { position:absolute; top:5px; right:5px; font-size:.58rem; padding:3px 7px; border-radius:12px; font-weight:600; background:rgba(231,76,60,.9); color:#fff; text-transform:uppercase; letter-spacing:.05em; }
 
+/* COUNTDOWN CARDS */
+.countdown-card { background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:1rem; margin-bottom:.75rem; transition:background .2s; }
+.countdown-card:hover { background:var(--surface2); }
+.countdown-header { display:flex; gap:.75rem; margin-bottom:.7rem; }
+.countdown-img { width:60px; height:85px; object-fit:cover; border-radius:6px; background:var(--surface2); flex-shrink:0; cursor:pointer; }
+.countdown-info { flex:1; min-width:0; }
+.countdown-title { font-size:.9rem; font-weight:600; color:var(--text); margin-bottom:.3rem; line-height:1.3; cursor:pointer; }
+.countdown-title:hover { color:var(--purple); }
+.countdown-meta { font-size:.75rem; color:var(--dim); }
+.countdown-timer { display:flex; gap:.5rem; align-items:center; }
+.countdown-box { flex:1; text-align:center; background:var(--surface2); border-radius:6px; padding:.4rem .3rem; }
+.countdown-num { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--red); line-height:1; }
+.countdown-label { font-size:.6rem; color:var(--dimmer); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+
 /* SEASONAL FILTERS */
 .season-filters { display:flex; gap:.5rem; margin-bottom:1rem; flex-wrap:wrap; }
 .season-select { flex:1; min-width:120px; background:var(--surface); border:.5px solid var(--border); border-radius:9px; padding:.75rem 1rem; color:var(--text); font-size:.95rem; font-family:'Inter',sans-serif; outline:none; cursor:pointer; }
@@ -239,6 +253,8 @@
   <div class="tab active" onclick="switchTab('list')">My List</div>
   <div class="tab" onclick="switchTab('search')">Search</div>
   <div class="tab" onclick="switchTab('seasonal')">This Season</div>
+  <div class="tab" onclick="switchTab('trending')">Trending</div>
+  <div class="tab" onclick="switchTab('studios')">Studios</div>
   <div class="tab" onclick="switchTab('foryou')">For You</div>
 </div>
 
@@ -355,6 +371,34 @@
   </div>
 </div>
 
+<!-- TRENDING TAB -->
+<div id="panel-trending" class="panel">
+  <div class="q-section">
+    <div class="q-label">🔥 Trending This Week</div>
+    <div id="trending-area"></div>
+  </div>
+
+  <div class="q-section" style="margin-top:2rem">
+    <div class="q-label">⏰ Airing Soon - Next Episodes</div>
+    <div id="airing-countdown-area"></div>
+  </div>
+
+  <div class="q-section" style="margin-top:2rem">
+    <div class="q-label">⭐ Most Popular</div>
+    <div id="popular-area"></div>
+  </div>
+</div>
+
+<!-- STUDIOS TAB -->
+<div id="panel-studios" class="panel">
+  <div class="q-section">
+    <div class="q-label">Featured Studios</div>
+    <div class="chips" id="studio-chips"></div>
+  </div>
+
+  <div id="studio-results-area"></div>
+</div>
+
 <!-- FOR YOU TAB -->
 <div id="panel-foryou" class="panel">
   <div class="search-wrap">
@@ -439,6 +483,8 @@
     event.target.classList.add("active");
     document.getElementById(`panel-${name}`).classList.add("active");
     if (name === "seasonal") initSeasonal();
+    if (name === "trending") initTrending();
+    if (name === "studios") initStudios();
   }
 
   // SEARCH - MY LIST
@@ -1049,6 +1095,253 @@
           <div class="poster-score" style="color:${scoreColor}">★ ${score}<span style="color:var(--dim)"> / 10</span></div>
         </div>
       </div>`;
+  }
+
+  // TRENDING TAB
+  let countdownInterval = null;
+
+  function initTrending() {
+    const trendingArea = document.getElementById("trending-area");
+    const popularArea = document.getElementById("popular-area");
+    
+    if (trendingArea.innerHTML) return; // already loaded
+    
+    loadTrending();
+    loadPopular();
+    loadAiringCountdown();
+    
+    // Update countdown every second
+    if (countdownInterval) clearInterval(countdownInterval);
+    countdownInterval = setInterval(updateCountdowns, 1000);
+  }
+
+  async function loadTrending() {
+    const area = document.getElementById("trending-area");
+    area.innerHTML = `<div class="loading">Loading...</div>`;
+    
+    try {
+      const r = await fetch(`${JIKAN}/top/anime?filter=airing&limit=12`);
+      const d = await r.json();
+      const data = d.data || [];
+      
+      if (!data.length) {
+        area.innerHTML = `<div class="empty-state">No trending anime found.</div>`;
+        return;
+      }
+      area.innerHTML = `<div class="results-grid">${data.map(posterCard).join("")}</div>`;
+    } catch (e) {
+      area.innerHTML = `<div class="err">Failed to load trending anime.</div>`;
+    }
+  }
+
+  async function loadPopular() {
+    const area = document.getElementById("popular-area");
+    area.innerHTML = `<div class="loading">Loading...</div>`;
+    
+    try {
+      const r = await fetch(`${JIKAN}/top/anime?filter=bypopularity&limit=12`);
+      const d = await r.json();
+      const data = d.data || [];
+      
+      if (!data.length) {
+        area.innerHTML = `<div class="empty-state">No popular anime found.</div>`;
+        return;
+      }
+      area.innerHTML = `<div class="results-grid">${data.map(posterCard).join("")}</div>`;
+    } catch (e) {
+      area.innerHTML = `<div class="err">Failed to load popular anime.</div>`;
+    }
+  }
+
+  async function loadAiringCountdown() {
+    const area = document.getElementById("airing-countdown-area");
+    area.innerHTML = `<div class="loading">Loading...</div>`;
+    
+    try {
+      const r = await fetch(`${JIKAN}/schedules`);
+      const d = await r.json();
+      const data = (d.data || []).slice(0, 8);
+      
+      if (!data.length) {
+        area.innerHTML = `<div class="empty-state">No upcoming episodes found.</div>`;
+        return;
+      }
+      
+      area.innerHTML = data.map(a => {
+        const id = a.mal_id;
+        const title = esc(a.title);
+        const img = a.images?.jpg?.image_url || "";
+        const broadcast = a.broadcast?.string || "Unknown";
+        const nextEp = getNextBroadcastTime(a.broadcast);
+        
+        return `
+          <div class="countdown-card">
+            <div class="countdown-header">
+              <img src="${img}" alt="${title}" class="countdown-img" onclick="openModal(${id})">
+              <div class="countdown-info">
+                <div class="countdown-title" onclick="openModal(${id})">${a.title}</div>
+                <div class="countdown-meta">${broadcast}</div>
+              </div>
+            </div>
+            ${nextEp ? `
+              <div class="countdown-timer" data-target="${nextEp.getTime()}">
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="days">--</div>
+                  <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="hours">--</div>
+                  <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="mins">--</div>
+                  <div class="countdown-label">Mins</div>
+                </div>
+                <div class="countdown-box">
+                  <div class="countdown-num" data-unit="secs">--</div>
+                  <div class="countdown-label">Secs</div>
+                </div>
+              </div>
+            ` : `<div style="text-align:center;color:var(--dimmer);font-size:.8rem;padding:.5rem">Broadcast time unknown</div>`}
+          </div>
+        `;
+      }).join("");
+      
+      updateCountdowns();
+    } catch (e) {
+      area.innerHTML = `<div class="err">Failed to load airing schedule.</div>`;
+    }
+  }
+
+  function getNextBroadcastTime(broadcast) {
+    if (!broadcast || !broadcast.day || !broadcast.time) return null;
+    
+    const days = { monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 0 };
+    const targetDay = days[broadcast.day.toLowerCase()];
+    if (targetDay === undefined) return null;
+    
+    // Parse JST time (format: "HH:MM")
+    const timeParts = broadcast.time.split(":");
+    if (timeParts.length !== 2) return null;
+    const hours = parseInt(timeParts[0]);
+    const mins = parseInt(timeParts[1]);
+    if (isNaN(hours) || isNaN(mins)) return null;
+    
+    // Get current time in JST (UTC+9)
+    const now = new Date();
+    const jstOffset = 9 * 60; // JST is UTC+9
+    const localOffset = now.getTimezoneOffset();
+    const jstNow = new Date(now.getTime() + (jstOffset + localOffset) * 60000);
+    
+    // Calculate next occurrence
+    let nextDate = new Date(jstNow);
+    nextDate.setHours(hours, mins, 0, 0);
+    
+    const currentDay = jstNow.getDay();
+    let daysUntil = targetDay - currentDay;
+    
+    // If same day but time has passed, or if day has passed, go to next week
+    if (daysUntil < 0 || (daysUntil === 0 && jstNow >= nextDate)) {
+      daysUntil += 7;
+    }
+    
+    nextDate.setDate(nextDate.getDate() + daysUntil);
+    
+    // Convert back to local time
+    return new Date(nextDate.getTime() - (jstOffset + localOffset) * 60000);
+  }
+
+  function updateCountdowns() {
+    const timers = document.querySelectorAll(".countdown-timer[data-target]");
+    const now = Date.now();
+    
+    timers.forEach(timer => {
+      const target = parseInt(timer.dataset.target);
+      const diff = target - now;
+      
+      if (diff <= 0) {
+        timer.innerHTML = `<div style="text-align:center;color:var(--green);font-size:.85rem;padding:.5rem;width:100%">🎬 Airing now!</div>`;
+        return;
+      }
+      
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      const daysEl = timer.querySelector('[data-unit="days"]');
+      const hoursEl = timer.querySelector('[data-unit="hours"]');
+      const minsEl = timer.querySelector('[data-unit="mins"]');
+      const secsEl = timer.querySelector('[data-unit="secs"]');
+      
+      if (daysEl) daysEl.textContent = String(days).padStart(2, '0');
+      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+      if (minsEl) minsEl.textContent = String(mins).padStart(2, '0');
+      if (secsEl) secsEl.textContent = String(secs).padStart(2, '0');
+    });
+  }
+
+  // STUDIOS TAB
+  const featuredStudios = [
+    { id: 569, name: "MAPPA" },
+    { id: 803, name: "Trigger" },
+    { id: 44, name: "Shaft" },
+    { id: 28, name: "OLM" },
+    { id: 18, name: "Toei Animation" },
+    { id: 10, name: "Production I.G" },
+    { id: 11, name: "Madhouse" },
+    { id: 4, name: "Bones" },
+    { id: 43, name: "ufotable" },
+    { id: 1, name: "Pierrot" },
+    { id: 7, name: "J.C.Staff" },
+    { id: 112, name: "Kyoto Animation" },
+    { id: 56, name: "A-1 Pictures" },
+    { id: 70, name: "Wit Studio" },
+    { id: 6, name: "Gainax" },
+    { id: 37, name: "Studio Deen" },
+    { id: 441, name: "David Production" },
+    { id: 1258, name: "CloverWorks" }
+  ];
+
+  let selectedStudio = null;
+
+  function initStudios() {
+    const chips = document.getElementById("studio-chips");
+    if (chips.innerHTML) return; // already loaded
+    
+    chips.innerHTML = featuredStudios.map(s => 
+      `<div class="chip" data-id="${s.id}" onclick="selectStudio(${s.id},'${esc(s.name)}')">${s.name}</div>`
+    ).join("");
+  }
+
+  async function selectStudio(id, name) {
+    const chips = document.getElementById("studio-chips");
+    chips.querySelectorAll(".chip").forEach(c => c.classList.remove("sel-g"));
+    chips.querySelector(`[data-id="${id}"]`).classList.add("sel-g");
+    
+    selectedStudio = { id, name };
+    
+    const area = document.getElementById("studio-results-area");
+    area.innerHTML = `<div class="loading">Loading ${name} anime...</div>`;
+    
+    try {
+      const r = await fetch(`${JIKAN}/anime?producers=${id}&order_by=score&sort=desc&limit=24&sfw=true`);
+      const d = await r.json();
+      const data = d.data || [];
+      
+      if (!data.length) {
+        area.innerHTML = `<div class="empty-state">No anime found for this studio.</div>`;
+        return;
+      }
+      
+      area.innerHTML = `
+        <div class="results-section" style="margin-top:1.5rem">
+          <div class="results-heading"><span>${name} — Top Rated</span></div>
+          <div class="results-grid">${data.map(posterCard).join("")}</div>
+        </div>`;
+    } catch (e) {
+      area.innerHTML = `<div class="err">Failed to load studio anime.</div>`;
+    }
   }
 
   // FOR YOU TAB
