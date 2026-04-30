@@ -898,17 +898,32 @@
   async function loadMoreSearch() {
     if (!currentSearchQuery) return;
     searchResultsPage++;
-    const btn = event.target;
-    btn.disabled = true;
-    btn.textContent = "Loading...";
+    const area = document.getElementById("search-results-area");
+    const existingBtn = area.querySelector(".load-more");
+    if (existingBtn) {
+      existingBtn.disabled = true;
+      existingBtn.textContent = "Loading...";
+    }
+    
     try {
       const r = await fetch(`${JIKAN}/anime?q=${encodeURIComponent(currentSearchQuery)}&sfw=true&limit=24&page=${searchResultsPage}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
-      currentSearchResults = [...currentSearchResults, ...(d.data || [])];
+      const newData = d.data || [];
+      
+      if (!newData.length) {
+        if (existingBtn) existingBtn.textContent = "No more results";
+        return;
+      }
+      
+      currentSearchResults = [...currentSearchResults, ...newData];
       sortSearchResults();
     } catch (e) {
-      btn.textContent = "Load Failed";
-      setTimeout(() => { btn.disabled = false; btn.textContent = "Load More Results"; }, 2000);
+      console.error("Load more search error:", e);
+      if (existingBtn) {
+        existingBtn.textContent = "Load Failed - Try Again";
+        existingBtn.disabled = false;
+      }
     }
   }
 
@@ -1016,24 +1031,44 @@
   async function loadMoreTags() {
     if (!tagParams) return;
     tagResultsPage++;
-    const btn = event.target;
-    btn.disabled = true;
-    btn.textContent = "Loading...";
+    const area = document.getElementById("tag-results-area");
+    const existingBtn = area.querySelector(".load-more");
+    if (existingBtn) {
+      existingBtn.disabled = true;
+      existingBtn.textContent = "Loading...";
+    }
+    
     try {
       const r = await fetch(`${JIKAN}/anime?${tagParams}&page=${tagResultsPage}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
-      currentTagResults = [...currentTagResults, ...(d.data || [])];
+      const newData = d.data || [];
+      
+      if (!newData.length) {
+        if (existingBtn) existingBtn.textContent = "No more results";
+        return;
+      }
+      
+      currentTagResults = [...currentTagResults, ...newData];
       renderTagResults();
     } catch (e) {
-      btn.textContent = "Load Failed";
-      setTimeout(() => { btn.disabled = false; btn.textContent = "Load More Anime"; }, 2000);
+      console.error("Load more tags error:", e);
+      if (existingBtn) {
+        existingBtn.textContent = "Load Failed - Try Again";
+        existingBtn.disabled = false;
+      }
     }
   }
 
   // SEASONAL TAB
   function initSeasonal() {
     const yearSelect = document.getElementById("season-year");
-    if (yearSelect.options.length > 0) return; // already initialized
+    if (yearSelect.options.length > 0) {
+      // Already initialized, just reload
+      loadSeasonalAnime();
+      loadNewReleases();
+      return;
+    }
     
     const currentYear = new Date().getFullYear();
     for (let y = currentYear; y >= 1990; y--) {
@@ -1058,20 +1093,25 @@
   async function loadSeasonalAnime() {
     const year = document.getElementById("season-year").value;
     const season = document.getElementById("season-name").value;
+    
+    if (!year || !season) return;
+    
     const area = document.getElementById("seasonal-area");
-    area.innerHTML = `<div class="loading">Loading...</div>`;
+    area.innerHTML = `<div class="loading">Loading ${season} ${year} anime...</div>`;
     
     try {
       const r = await fetch(`${JIKAN}/seasons/${year}/${season}`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const d = await r.json();
       const data = (d.data || []).slice(0, 24);
       if (!data.length) {
-        area.innerHTML = `<div class="empty-state">No anime found for this season.</div>`;
+        area.innerHTML = `<div class="empty-state">No anime found for ${season} ${year}.</div>`;
         return;
       }
       area.innerHTML = `<div class="results-grid">${data.map(a => seasonalCard(a)).join("")}</div>`;
     } catch (e) {
-      area.innerHTML = `<div class="err">Failed to load seasonal anime.</div>`;
+      console.error("Seasonal load error:", e);
+      area.innerHTML = `<div class="err">Failed to load seasonal anime. Try a different season.</div>`;
     }
   }
 
@@ -1483,7 +1523,10 @@
         (!a.score || a.score === 0) ? 
           fetch(`${JIKAN}/anime/${a.mal_id}`)
             .then(r => r.json())
-            .then(d => { if (d.data?.score) a.score = d.data.score; })
+            .then(d => { 
+              if (d.data?.score) a.score = d.data.score;
+              if (d.data?.genres) a.genres = d.data.genres;
+            })
             .catch(() => {}) 
         : Promise.resolve()
       );
@@ -1507,10 +1550,21 @@
 
       // Apply mood genre filter
       if (mood !== "any" && loved.length) {
-        const moodToGenre = { action:[1,2], emotional:[8,22], dark:[40,14,41], chill:[36,4], funny:[4], romance:[22], mindbending:[7,40] };
+        const moodToGenre = { 
+          action:[1,2], 
+          emotional:[8,22], 
+          dark:[40,14,41], 
+          chill:[36,4], 
+          funny:[4], 
+          romance:[22], 
+          mindbending:[7,40] 
+        };
         const wanted = moodToGenre[mood] || [];
         if (wanted.length) {
-          const filtered = results.filter(a => (a.genres||[]).some(g=>wanted.includes(g.mal_id)));
+          const filtered = results.filter(a => {
+            if (!a.genres || !Array.isArray(a.genres)) return false;
+            return a.genres.some(g => wanted.includes(g.mal_id));
+          });
           if (filtered.length >= 4) results = filtered;
         }
       }
@@ -1518,7 +1572,8 @@
       // Apply format filter
       if (mediaType) results = results.filter(a => !a.type || a.type.toLowerCase()===mediaType);
 
-      status.innerHTML = ""; btn.disabled = false;
+      status.innerHTML = ""; 
+      btn.disabled = false;
 
       if (!results.length) {
         status.innerHTML = `<div class="err">No results found. Try adding more loved anime or changing the mood.</div>`;
@@ -1531,6 +1586,7 @@
       renderFyGrid(moodLabel);
 
     } catch(e) {
+      console.error("For You error:", e);
       status.innerHTML = `<div class="err">Something went wrong. Please try again.</div>`;
       btn.disabled = false;
     }
