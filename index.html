@@ -2227,6 +2227,9 @@
                 const anime = data.data;
                 if (!anime) return item;
                 
+                // Update image to high quality version
+                item.img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || item.img;
+                
                 // Get the actual start date
                 const airedFrom = anime.aired?.from;
                 item.airedFrom = airedFrom;
@@ -2258,7 +2261,7 @@
             return a.day - b.day;
           });
           
-          console.log("Watch order sorted:", watchOrderItems.map(i => `${i.title} (${i.year})`));
+          console.log("Watch order sorted:", watchOrderItems.map(i => `${i.title} (${i.year}) - ${i.img ? 'has image' : 'NO IMAGE'}`));
         } catch (e) {
           console.error("Failed to fetch watch order details:", e);
         }
