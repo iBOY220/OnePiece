@@ -164,13 +164,24 @@
     .results-heading { font-family:'Bebas Neue',sans-serif; font-size:.85rem; letter-spacing:.18em; color:var(--dim); margin-bottom:.85rem; padding-bottom:.5rem; border-bottom:.5px solid var(--border2); display:flex; align-items:center; justify-content:space-between; }
     .results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:1rem; }
 
-    .anime-poster { position:relative; border-radius:8px; overflow:hidden; background:var(--surface); transition:transform .2s, box-shadow .2s; }
+    .anime-poster { position:relative; border-radius:8px; overflow:hidden; background:var(--surface); transition:transform .2s, box-shadow .2s; cursor:grab; }
+    .anime-poster:active { cursor:grabbing; }
+    .anime-poster.dragging { opacity: 0.5; transform: scale(0.95); }
     .anime-poster:hover { transform:translateY(-5px); box-shadow:0 10px 28px rgba(0,0,0,.6); }
-    .anime-poster > img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
-    .poster-info { padding:.5rem .65rem .65rem; }
+    .anime-poster > img { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); pointer-events: none; }
+    .poster-info { padding:.5rem .65rem .65rem; pointer-events: none; }
     .poster-title { font-size:.77rem; font-weight:500; color:var(--text); line-height:1.35; margin-bottom:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
     .poster-score { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--red); }
     .poster-score span { font-family:'Inter',sans-serif; font-size:.65rem; color:var(--dim); margin-left:2px; }
+    
+    /* Drop zones */
+    .card-grid.drop-zone-active { 
+      background: rgba(142,68,173,0.08); 
+      border: 2px dashed var(--purple); 
+      border-radius: 8px;
+      min-height: 150px;
+      padding: 1rem;
+    }
 
     /* HOVER OVERLAY */
     .poster-overlay {
@@ -529,15 +540,18 @@
         <div id="popular-area"></div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 320px;gap:2rem;margin-top:2rem">
-        <div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:2rem;margin-top:2rem;align-items:start">
+        <div style="width:100%">
           <div class="q-section">
-            <div class="q-label">🔥 Trending This Week</div>
+            <div class="q-label" style="display:flex;align-items:center;justify-content:space-between">
+              <span>🔥 Trending This Week</span>
+              <div id="week-countdown" style="font-family:'Inter',sans-serif;font-size:.7rem;color:var(--dimmer);font-weight:400"></div>
+            </div>
             <div id="trending-area"></div>
           </div>
         </div>
 
-        <div>
+        <div style="position:sticky;top:1rem">
           <div class="q-section">
             <div class="q-label">⏰ Airing Soon</div>
             <div id="airing-countdown-area"></div>
@@ -684,9 +698,15 @@
     document.getElementById(`panel-${name}`).classList.add("active");
     
     // Stop countdown when leaving trending tab
-    if (name !== "trending" && countdownInterval) {
-      clearInterval(countdownInterval);
-      countdownInterval = null;
+    if (name !== "trending") {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      if (weekCountdownInterval) {
+        clearInterval(weekCountdownInterval);
+        weekCountdownInterval = null;
+      }
     }
     
     if (name === "seasonal") initSeasonal();
@@ -830,13 +850,14 @@
       return;
     }
     grid.innerHTML = favorites.map(a => `
-      <div class="anime-card" onclick="openModal(${a.id})">
+      <div class="anime-card" draggable="true" data-id="${a.id}" data-list="favorites" data-title="${esc(a.title)}" data-img="${esc(a.img)}" onclick="openModal(${a.id})">
         <img src="${a.img}" alt="${esc(a.title)}" loading="lazy">
         <div class="ac-badge fav">⭐</div>
         <button class="ac-remove" onclick="event.stopPropagation();removeFromList('favorites',${a.id})">✕</button>
         <div class="ac-title">${a.title}</div>
       </div>
     `).join("");
+    enableDragDrop();
   }
 
   function renderWantToWatch() {
@@ -847,12 +868,13 @@
       return;
     }
     grid.innerHTML = wantToWatch.map(a => `
-      <div class="anime-card" onclick="openModal(${a.id})">
+      <div class="anime-card" draggable="true" data-id="${a.id}" data-list="want_to_watch" data-title="${esc(a.title)}" data-img="${esc(a.img)}" onclick="openModal(${a.id})">
         <img src="${a.img}" alt="${esc(a.title)}" loading="lazy">
         <button class="ac-remove" onclick="event.stopPropagation();removeFromList('want_to_watch',${a.id})">✕</button>
         <div class="ac-title">${a.title}</div>
       </div>
     `).join("");
+    enableDragDrop();
   }
 
   function renderLoved() {
@@ -884,18 +906,129 @@
       return;
     }
     grid.innerHTML = watched.map(a => `
-      <div class="anime-card" onclick="openModal(${a.id})">
+      <div class="anime-card" draggable="true" data-id="${a.id}" data-list="watched" data-title="${esc(a.title)}" data-img="${esc(a.img)}" onclick="openModal(${a.id})">
         <img src="${a.img}" alt="${esc(a.title)}" loading="lazy">
         <button class="ac-remove" onclick="event.stopPropagation();removeFromList('watched',${a.id})">✕</button>
         <div class="ac-title">${a.title}</div>
       </div>
     `).join("");
+    enableDragDrop();
   }
 
   renderFavorites();
   renderWantToWatch();
   renderLoved();
   renderWatched();
+
+  // DRAG AND DROP FUNCTIONALITY
+  let draggedAnime = null;
+
+  function enableDragDrop() {
+    // Enable drag on all anime cards
+    document.querySelectorAll('.anime-card[draggable="true"]').forEach(card => {
+      card.addEventListener('dragstart', handleDragStart);
+      card.addEventListener('dragend', handleDragEnd);
+    });
+
+    // Enable drop on all list grids
+    const dropZones = ['favorites-grid', 'want-grid', 'watched-grid'];
+    dropZones.forEach(zoneId => {
+      const zone = document.getElementById(zoneId);
+      if (zone) {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('dragleave', handleDragLeave);
+        zone.addEventListener('drop', handleDrop);
+      }
+    });
+  }
+
+  function handleDragStart(e) {
+    const card = e.target.closest('.anime-card');
+    if (!card) return;
+    
+    draggedAnime = {
+      id: parseInt(card.dataset.id),
+      title: card.dataset.title,
+      img: card.dataset.img,
+      fromList: card.dataset.list
+    };
+    
+    card.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', card.innerHTML);
+  }
+
+  function handleDragEnd(e) {
+    const card = e.target.closest('.anime-card');
+    if (card) card.classList.remove('dragging');
+    
+    // Remove all drop zone highlights
+    document.querySelectorAll('.card-grid').forEach(grid => {
+      grid.classList.remove('drop-zone-active');
+    });
+  }
+
+  function handleDragOver(e) {
+    if (!draggedAnime) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    const grid = e.currentTarget;
+    grid.classList.add('drop-zone-active');
+  }
+
+  function handleDragLeave(e) {
+    const grid = e.currentTarget;
+    if (!grid.contains(e.relatedTarget)) {
+      grid.classList.remove('drop-zone-active');
+    }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    if (!draggedAnime) return;
+    
+    const grid = e.currentTarget;
+    grid.classList.remove('drop-zone-active');
+    
+    // Determine target list based on grid ID
+    let toList = '';
+    if (grid.id === 'favorites-grid') toList = 'favorites';
+    else if (grid.id === 'want-grid') toList = 'want_to_watch';
+    else if (grid.id === 'watched-grid') toList = 'watched';
+    
+    if (!toList || toList === draggedAnime.fromList) return;
+    
+    // Move anime between lists
+    moveAnime(draggedAnime, toList);
+    draggedAnime = null;
+  }
+
+  function moveAnime(anime, toList) {
+    const {id, title, img, fromList} = anime;
+    
+    // Remove from source list
+    if (fromList === 'favorites') favorites = favorites.filter(a => a.id !== id);
+    else if (fromList === 'want_to_watch') wantToWatch = wantToWatch.filter(a => a.id !== id);
+    else if (fromList === 'watched') watched = watched.filter(a => a.id !== id);
+    
+    // Add to target list (if not already there)
+    const targetArray = toList === 'favorites' ? favorites : 
+                        toList === 'want_to_watch' ? wantToWatch : watched;
+    
+    if (!targetArray.find(a => a.id === id)) {
+      targetArray.push({ id, title, img });
+    }
+    
+    // Save and re-render
+    saveAll();
+    renderFavorites();
+    renderWantToWatch();
+    renderWatched();
+    
+    // Update all button states across app
+    updateAllButtonStates(id);
+  }
 
   // RANDOM PICKER - Smart recommendation based on selected source
   async function pickRandom() {
@@ -1412,6 +1545,7 @@
 
   // TRENDING TAB
   let countdownInterval = null;
+  let weekCountdownInterval = null;
 
   function initTrending() {
     const trendingArea = document.getElementById("trending-area");
@@ -1426,6 +1560,42 @@
     // Update countdown every second
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(updateCountdowns, 1000);
+    
+    // Update week countdown
+    if (weekCountdownInterval) clearInterval(weekCountdownInterval);
+    updateWeekCountdown();
+    weekCountdownInterval = setInterval(updateWeekCountdown, 1000);
+  }
+
+  function updateWeekCountdown() {
+    const countdownEl = document.getElementById("week-countdown");
+    if (!countdownEl) return;
+    
+    const now = new Date();
+    const utcNow = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 
+                             now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+    
+    // Find next Monday at 00:00 UTC
+    const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 1 = Monday
+    const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7 || 7;
+    
+    const nextMonday = new Date(now);
+    nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+    nextMonday.setUTCHours(0, 0, 0, 0);
+    
+    const diff = nextMonday.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      countdownEl.textContent = "New week starting...";
+      return;
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const secs = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    countdownEl.textContent = `Next week: ${days}d ${hours}h ${mins}m ${secs}s`;
   }
 
   async function loadTrending() {
@@ -2030,7 +2200,7 @@
         }
       }
 
-      // Build watch order from relations - fetch full details to get aired dates
+      // Build watch order from relations - fetch full details to get proper chronological order
       const watchOrderItems = [];
       
       for (const relGroup of relations) {
@@ -2048,30 +2218,47 @@
         }
       }
       
-      // Fetch aired dates for proper chronological ordering
-      if (watchOrderItems.length > 0 && watchOrderItems.length <= 10) {
+      // Fetch full details for chronological ordering
+      if (watchOrderItems.length > 0 && watchOrderItems.length <= 15) {
         try {
           const detailPromises = watchOrderItems.map(item => 
             fetchWithRetry(`${JIKAN}/anime/${item.id}`)
               .then(data => {
-                item.airedFrom = data.data?.aired?.from || null;
-                item.year = data.data?.aired?.prop?.from?.year || 9999;
+                const anime = data.data;
+                if (!anime) return item;
+                
+                // Get the actual start date
+                const airedFrom = anime.aired?.from;
+                item.airedFrom = airedFrom;
+                item.year = anime.aired?.prop?.from?.year || anime.year || 9999;
+                item.month = anime.aired?.prop?.from?.month || 1;
+                item.day = anime.aired?.prop?.from?.day || 1;
+                item.type = anime.type; // TV, Movie, OVA, Special
+                
                 return item;
               })
-              .catch(() => {
+              .catch(err => {
+                console.error(`Failed to fetch details for ${item.title}:`, err);
                 item.year = 9999;
                 return item;
               })
           );
           await Promise.all(detailPromises);
           
-          // Sort by aired date (chronological order)
+          // Sort by actual date (year, month, day)
           watchOrderItems.sort((a, b) => {
+            // If we have full dates, use them
             if (a.airedFrom && b.airedFrom) {
               return new Date(a.airedFrom) - new Date(b.airedFrom);
             }
-            return a.year - b.year;
+            
+            // Otherwise compare year, month, day
+            if (a.year !== b.year) return a.year - b.year;
+            if (a.month !== b.month) return a.month - b.month;
+            return a.day - b.day;
           });
+          
+          console.log("Watch order sorted:", watchOrderItems.map(i => `${i.title} (${i.year})`));
         } catch (e) {
           console.error("Failed to fetch watch order details:", e);
         }
