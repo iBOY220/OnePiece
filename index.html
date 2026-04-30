@@ -251,7 +251,7 @@
   <div class="search-results" id="list-search-results"></div>
 
   <!-- RANDOM PICKER -->
-  <button class="random-btn" onclick="pickRandom()" id="random-btn">🎲 Pick Something Random</button>
+  <button class="random-btn" onclick="pickRandom()" id="random-btn">🎲 Pick Something For Me</button>
   <div class="random-result" id="random-result"></div>
 
   <div class="list-section">
@@ -608,25 +608,127 @@
   renderWantToWatch();
   renderLoved();
 
-  // RANDOM PICKER
-  function pickRandom() {
-    if (!wantToWatch.length) {
-      alert("Your Want to Watch list is empty!");
+  // RANDOM PICKER - Smart recommendation based on favorites
+  async function pickRandom() {
+    if (!favorites.length) {
+      alert("Add some favorites first so I can recommend something you'll like!");
       return;
     }
-    const random = wantToWatch[Math.floor(Math.random() * wantToWatch.length)];
+
+    const btn = document.getElementById("random-btn");
+    const result = document.getElementById("random-result");
+    
+    btn.disabled = true;
+    btn.textContent = "🔍 Finding something for you...";
+    result.innerHTML = `<div class="loading">Analyzing your favorites...</div>`;
+    result.classList.add("show");
+
+    try {
+      // Get all existing IDs to exclude
+      const excludeIds = new Set([
+        ...favorites.map(x => x.id),
+        ...wantToWatch.map(x => x.id),
+        ...loved.map(x => x.id)
+      ]);
+
+      // Pick a random favorite to base recommendation on
+      const baseFav = favorites[Math.floor(Math.random() * favorites.length)];
+      
+      // Get recommendations for this favorite
+      const r = await fetch(`${JIKAN}/anime/${baseFav.id}/recommendations`);
+      const d = await r.json();
+      const recs = (d.data || [])
+        .filter(rec => !excludeIds.has(rec.entry.mal_id))
+        .sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+      if (!recs.length) {
+        result.innerHTML = `<div class="err">Couldn't find new recommendations. Try adding more favorites!</div>`;
+        btn.disabled = false;
+        btn.textContent = "🎲 Pick Something Random";
+        return;
+      }
+
+      // Pick the top recommended one
+      const pick = recs[0].entry;
+      
+      // Fetch full details for this anime
+      const detailRes = await fetch(`${JIKAN}/anime/${pick.mal_id}`);
+      const detailData = await detailRes.json();
+      const anime = detailData.data;
+
+      const img = anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || "";
+      const score = anime.score ? parseFloat(anime.score).toFixed(1) : "N/A";
+      const scoreColor = anime.score ? (anime.score>=8?"#27ae60":anime.score>=7?"#e8a030":"var(--red)") : "var(--dimmer)";
+      const genres = (anime.genres || []).slice(0, 3).map(g => g.name).join(", ");
+
+      result.innerHTML = `
+        <div style="display:flex;gap:1rem">
+          <img src="${img}" style="width:100px;border-radius:8px;cursor:pointer;flex-shrink:0" onclick="openModal(${pick.mal_id})" alt="${esc(anime.title)}">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:1.05rem;font-weight:600;margin-bottom:.3rem;color:var(--text)">${anime.title}</div>
+            <div style="font-size:.75rem;color:var(--dim);margin-bottom:.4rem">Because you liked <span style="color:var(--purple)">${baseFav.title}</span></div>
+            <div style="font-size:.8rem;color:var(--muted);margin-bottom:.5rem">
+              <span style="color:${scoreColor};font-weight:600">★ ${score}</span> · 
+              ${anime.type || "?"} · 
+              ${anime.episodes || "?"} eps
+              ${genres ? ` · ${genres}` : ""}
+            </div>
+            <div style="display:flex;gap:.5rem;margin-top:.7rem">
+              <button onclick="markAsWatched(${pick.mal_id},'${esc(anime.title)}','${esc(img)}')" style="flex:1;padding:.6rem;background:#27ae60;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.85rem;font-weight:500">✓ Watched</button>
+              <button onclick="addToWantFromRandom(${pick.mal_id},'${esc(anime.title)}','${esc(img)}')" style="flex:1;padding:.6rem;background:var(--purple);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.85rem;font-weight:500">+ Want to Watch</button>
+            </div>
+            <button onclick="openModal(${pick.mal_id})" style="width:100%;padding:.5rem;background:var(--surface2);border:.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;font-size:.8rem;margin-top:.5rem">🔍 View Full Details</button>
+          </div>
+        </div>
+      `;
+      
+      btn.disabled = false;
+      btn.textContent = "🎲 Pick Something Random";
+
+    } catch (e) {
+      result.innerHTML = `<div class="err">Something went wrong. Please try again.</div>`;
+      btn.disabled = false;
+      btn.textContent = "🎲 Pick Something Random";
+    }
+  }
+
+  function markAsWatched(id, title, img) {
+    // Add to favorites as "watched"
+    if (!favorites.find(x => x.id === id)) {
+      favorites.push({ id, title, img });
+      saveAll();
+      renderFavorites();
+    }
+    
+    // Show confirmation
     const result = document.getElementById("random-result");
     result.innerHTML = `
-      <div style="display:flex;gap:1rem;align-items:center">
-        <img src="${random.img}" style="width:80px;border-radius:8px;cursor:pointer" onclick="openModal(${random.id})" alt="${esc(random.title)}">
-        <div style="flex:1">
-          <div style="font-size:1.1rem;font-weight:600;margin-bottom:.3rem;color:var(--text)">${random.title}</div>
-          <div style="font-size:.8rem;color:var(--dim);margin-bottom:.6rem">From your Want to Watch list</div>
-          <button onclick="openModal(${random.id})" style="padding:.5rem 1rem;background:var(--purple);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:.85rem;font-weight:500">View Details</button>
-        </div>
+      <div style="text-align:center;padding:1.5rem">
+        <div style="font-size:2rem;margin-bottom:.5rem">✓</div>
+        <div style="font-size:1rem;color:var(--text);font-weight:600;margin-bottom:.3rem">Marked as watched!</div>
+        <div style="font-size:.85rem;color:var(--dim)">Added to your Favorites</div>
       </div>
     `;
-    result.classList.add("show");
+    setTimeout(() => result.classList.remove("show"), 2000);
+  }
+
+  function addToWantFromRandom(id, title, img) {
+    if (!wantToWatch.find(x => x.id === id)) {
+      wantToWatch.push({ id, title, img });
+      saveAll();
+      renderWantToWatch();
+    }
+    
+    // Show confirmation
+    const result = document.getElementById("random-result");
+    result.innerHTML = `
+      <div style="text-align:center;padding:1.5rem">
+        <div style="font-size:2rem;margin-bottom:.5rem">📋</div>
+        <div style="font-size:1rem;color:var(--text);font-weight:600;margin-bottom:.3rem">Added to your list!</div>
+        <div style="font-size:.85rem;color:var(--dim)">Now in Want to Watch</div>
+      </div>
+    `;
+    setTimeout(() => result.classList.remove("show"), 2000);
   }
 
   // MAIN SEARCH TAB
